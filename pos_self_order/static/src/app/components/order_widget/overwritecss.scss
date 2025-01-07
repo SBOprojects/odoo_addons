@@ -1,0 +1,28 @@
+// Override the community color variable kad_shahd
+$o-community-color: #FFCA00 !important;
+ 
+/* Button styles */
+ 
+// Override .btn-primary font color to black
+.btn-primary {
+    background-color: #FFCA00 !important; /* Your desired color */
+    color: #000000 !important;  /* Font color to black */
+    border: none !important;    /* Remove border */
+}
+ 
+// Override .o_button font color to black
+.o_button {
+    background-color: $o-community-color !important;
+    color: #000000 !important;  /* Font color to black */
+    border: none !important;
+}
+ 
+// Yellow button custom style with black font
+ 
+/* Change the top bar to black */
+.o_header, .navbar {
+    background-color: #000000 !important;  /* Set the top bar to black */
+    color: #ffffff !important; /* Ensure text in the top bar remains visible */
+}
+ 
+ 

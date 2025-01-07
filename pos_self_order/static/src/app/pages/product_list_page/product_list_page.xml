@@ -1,0 +1,267 @@
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_self_order.ProductListPage">
+        <style>
+            /* Ensure overflow and scrolling behavior for categories */
+            #listgroup-categories {
+                display: grid !important;
+                gap: 1.5rem !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                scroll-behavior: smooth;
+                align-items: center;
+                justify-content: center;
+                padding: 10px;
+                box-sizing: border-box !important;
+                max-height: calc(100vh - 100px);
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+
+            #listgroup-categories::-webkit-scrollbar {
+                display: none;
+            }
+
+            /* Horizontal Scroll is applied if screen too small*/
+            #listgroup-categories.horizontal-scroll {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                justify-content: flex-start !important;
+                max-width: none !important;
+                 max-height: 170px; /* Set a fixed height to allow horizontal scroll */
+                 align-items: normal !important; /* Remove the center alignment from this specific class */
+            }
+
+
+            /* Scrolling products list with consistent overflow handling */
+            .product-list-container {
+                flex-grow: 1;
+                overflow-y: auto !important;
+                scroll-behavior: smooth;
+            }
+
+            /* Adjust child categories for better fit */
+             #listgroup-categories .child-category {
+                 width: 120px;
+                height: 150px;
+                padding: 8px;
+                font-size: 0.7rem;
+                border-radius: 8px;
+                flex: 0 0 auto; /* prevent flex shrink */
+             }
+
+            #listgroup-categories .parent-category{
+                 flex: 0 0 auto; /* prevent flex shrink */
+             }
+
+             /* Apply specific styles to the categories when they are shown on the nav bar on subcategories view*/
+             #listgroup-categories.horizontal-scroll .category-item {
+                display: flex;
+                flex-direction: column;  /* Added to align items vertically */
+                align-items: center !important;
+                padding: 10px !important;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                background-color: #f8f9fa;
+                margin-right: 8px !important;
+                box-sizing: border-box !important;
+                height: auto !important;
+            }
+             /* Hide the ratio container */
+             #listgroup-categories.horizontal-scroll .category-item .ratio {
+                display: none !important;
+             }
+            /* Ensure text in subcategories is visible */
+            #listgroup-categories.horizontal-scroll .category-item .category-name {
+                display: flex !important; /* or block as necessary*/
+                margin-top: 0px !important;
+                font-size: 0.9rem !important;
+                width: 100%; /*Ensure text takes up space*/
+                text-align: center; /*Align to center*/
+                justify-content: center;
+            }
+             #listgroup-categories.horizontal-scroll .category-item  small{
+                   display: block !important;
+             }
+            /* Products container scroll settings */
+            .product-list-category {
+                max-height: calc(100vh - 200px);
+                overflow-y: auto !important;
+                scroll-behavior: smooth;
+            }
+
+            /* Handle different screen sizes */
+           /* Default grid layout for larger screens */
+            @media (min-width: 769px) {
+                #listgroup-categories {
+                    grid-template-columns: repeat(3, 1fr) !important;
+                }
+            }
+
+            @media (min-width: 1050px) and (max-width: 1449px) {
+                #listgroup-categories {
+                    grid-template-columns: repeat(4, 1fr) !important;
+                }
+            }
+
+            @media (min-width: 1450px) {
+                #listgroup-categories {
+                    grid-template-columns: repeat(5, 1fr) !important;
+                }
+            }
+            /* Make the categories grid based on the screen width*/
+             @media (max-width: 768px) {
+                #listgroup-categories {
+                    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+                     display: grid !important;
+                     overflow-x: hidden !important;
+                     overflow-y: auto !important;
+                      justify-content: center !important;
+                      max-height: calc(100vh - 75px);
+                }
+
+                #listgroup-categories .parent-category, #listgroup-categories .child-category {
+                     height: auto;
+                 }
+            }
+
+
+            /* Footer Styles */
+            .o-so-footer {
+                position: sticky;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                z-index: 1000;
+                background-color: white;
+                border-top: 1px solid #dee2e6;
+            }
+             /* Loading Indicator Styles */
+            .loading-overlay {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background-color: rgba(255, 255, 255, 0.8);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              z-index: 1001;
+            }
+
+            .loading-spinner {
+              border: 8px solid #f3f3f3;
+              border-top: 8px solid #3498db;
+              border-radius: 50%;
+              width: 60px;
+              height: 60px;
+              animation: spin 1s linear infinite;
+            }
+
+           @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+
+
+        </style>
+
+        <div class="d-flex flex-column vh-100">
+            <!-- Categories selector + Search -->
+            <div class="navbar-container position-relative w-100 bg-view border-bottom z-1">
+                  <!-- Back Button -->
+                    <t t-if="selfOrder.currentCategoryStack.length > 1">
+                         <div class="category-item back-button"
+                            t-on-click="() => this.navigateBack()"
+                            style="align-items: center; cursor: pointer; width: 120px; margin-left: 10px; margin-top: 10px;">
+                            <i class="fa fa-arrow-left" style="font-size: 0.7em; margin-right: 5px;"></i>
+                            <span>Back</span>
+                        </div>
+                    </t>
+                   
+<nav t-attf-class="nav-categories #{selfOrder.currentCategory ? 'horizontal-scroll' : ''}"
+    id="listgroup-categories"
+    t-ref="categoryList"
+    t-attf-style="height: #{selfOrder.currentCategory ? '170px' : '100vh'};">
+
+                    <!-- Category List -->
+                    <t t-foreach="this.getCategoriesToDisplay()" t-as="category" t-key="category.id">
+                        <div
+                            t-ref="category_{{category.id}}"
+                            t-attf-class="category-item #{category.parent_id ? 'child-category' : 'parent-category'}"
+                             t-attf-style="height:#{category.parent_id ? '150px': 'calc(max-content + 100px)'}"
+                            t-on-click="() => this.onCategoryClick(category)">
+                            <div class="ratio ratio-1x1 mb-2">
+                                <img t-if="category.has_image"
+                                    class="rounded w-100 h-100"
+                                    t-attf-src="/web/image/pos.category/{{ category.id }}/image_128"
+                                    alt="Category image"
+                                    loading="lazy"
+                                    onerror="this.remove()" />
+                                <div t-if="!category.has_image"
+                                    class="w-100 h-100 bg-200 rounded d-flex align-items-center justify-content-center">
+                                    <small class="d-block fw-bold text-dark text-center"
+                                        style="font-size: 0.7rem;" t-esc="category.name" />
+                                </div>
+                            </div>
+                            <small t-if="category.has_image" class="d-block fw-bold category-name text-center mt-2" t-esc="category.name" />
+                           <small t-if="!category.has_image" class="d-block fw-bold category-name text-center mt-2" t-esc="category.name" />
+                        </div>
+                    </t>
+                </nav>
+            </div>
+
+            <!-- Products list -->
+            <div
+                id="scrollspy-products"
+                class="product-list position-relative flex-grow-1 overflow-y-auto"
+                t-ref="productsList"
+                tabindex="0">
+                <t t-if="state.loading">
+                   <div class="loading-overlay">
+                        <div class="loading-spinner"></div>
+                   </div>
+                </t>
+                 <t t-set="nbrItem" t-value="0" />
+                <t t-if="selfOrder.currentCategory and selfOrder.currentCategory.id">
+                    <section
+                        t-attf-id="scrollspy_{{selfOrder.currentCategory?.id}}"
+                        t-attf-categId="{{selfOrder.currentCategory?.id}}"
+                        t-ref="productsWithCategory_{{selfOrder.currentCategory?.id}}"
+                        class="product-list-category d-empty-none bg-view px-3 pb-4">
+                        <t t-set="products" t-value="this.getProductsForCategory(selfOrder.currentCategory) || []" />
+                        <t t-set="availableProducts" t-value="products" />
+                        <t t-set="nbrItem" t-value="availableProducts.length" />
+                        <t t-if="availableProducts.length > 0">
+                            <div class="pt-4 pb-2 px-3 mb-4 mx-n3 bg-200 fw-bold">
+                                <h2 t-esc="selfOrder.currentCategory.name"/>
+                                <span t-if="selfOrder.currentCategory and !selfOrder.isCategoryAvailable(selfOrder.currentCategory.id)" class="unavailable-text">Unavailable at this time of the day</span>
+                            </div>
+                            <div class="o-so-products-row">
+                                <t t-foreach="availableProducts" t-as="product" t-key="product.id">
+                                    <ProductCard product="product" currentProductCard="product.id === selfOrder.lastEditedProductId and currentProductCard" />
+                                </t>
+                            </div>
+                        </t>
+                    </section>
+                    
+                </t>
+                <p t-if="nbrItem === 0 and selfOrder.currentCategory" class="mx-auto mt-3 text-center">
+                </p>
+                <p t-if="!selfOrder.currentCategory" class="mx-auto mt-3 text-center">
+                    <!-- This message could show if there's truly no category selected,
+                        or you can label it as "Uncategorized" if you prefer. -->
+                    <!-- No products found for uncategorized -->
+                </p>
+            </div>
+
+           <!-- Footer with Order Widget -->
+           <footer class="o-so-footer">
+                <OrderWidget t-if="this.selfOrder.ordering" action.bind="review" />
+            </footer>
+
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,54 @@
+<odoo>
+    <data>
+
+        <!-- Form View for ApiAuth model -->
+        <record id="view_api_auth_form" model="ir.ui.view">
+            <field name="name">api.auth.form</field>
+            <field name="model">api.auth</field>
+            <field name="arch" type="xml">
+                <form string="Sirius" style="width: 60%; margin: 0 auto; padding: 20px; height: 1200px;">
+                    <sheet style="padding: 20px;">
+                        <group>
+                            <field name="login" placeholder="Enter Login"/>
+                            <field name="password" placeholder="Enter Password" password="True"/>
+                        </group>
+
+
+                        <div style="margin-top: 20px; margin-bottom: 20px; display: flex; gap: 10px;">
+                            <button name="authenticate" type="object" string="Login" class="btn-primary" style="width: auto;"/>
+                            <button name="send_all_products_to_api" type="object" string="Export Items To Sirius" class="btn-success" style="width: auto;" />
+                            <button name="import_transactions" type="object" string="Import Transactions From Sirius" class="btn-info" style="width: auto;" />
+                            <button name="export_all_items" type="object" string="Export Items From Sirius" class="btn-info" style="width: auto;" />
+                            <!-- <button name="export_all_hierarchy" type="object" string="Export Items From Sirius" class="btn-success" style="width: auto;" /> -->
+
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="action_api_auth" model="ir.actions.act_window">
+            <field name="name">Sirius</field>
+            <field name="res_model">api.auth</field>
+            <field name="view_mode">form</field>
+            <field name="target">current</field>
+            <field name="context">{'create': False}</field>
+        </record>
+        <!-- running the scheduled job to export items (rami) -->
+        <record id="ir_cron_print_statement" model="ir.cron">
+            <field name="name">Print Statement Every Minute</field>
+            <field name="model_id" ref="model_api_auth"/>
+            <field name="state">code</field>
+            <field name="code">model._scheduler_export_all_items()</field>
+            <field name="active" eval="True"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <!-- Set this to the exact date/time you want the *first* run at 2 AM.
+                Each subsequent run will also be at 2 AM, daily. -->
+            <field name="nextcall">2024-01-07 10:10:00</field>
+        </record>
+        <!-- Menu Item to Access the Form View -->
+        <menuitem id="menu_api_auth" name="Sirius" action="action_api_auth"/>
+
+    </data>
+</odoo>

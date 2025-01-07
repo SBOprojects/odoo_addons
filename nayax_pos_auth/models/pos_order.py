@@ -1,0 +1,448 @@
+from datetime import datetime
+import json
+import threading
+import time
+import requests
+import schedule
+from odoo import api, fields, models
+from odoo.exceptions import UserError
+from odoo.tools import _
+from odoo.addons.nayax_pos_auth.crypto_utils import decrypt_data, encrypt_data, generate_key, get_token, handle_request_with_relogin
+import logging
+
+_logger = logging.getLogger(__name__)
+
+
+class PosOrder(models.Model):
+    _inherit = "pos.order"
+    order_draft_id = fields.Integer(string='Draft Order ID', default=0)
+    _processed_orders = set()
+    sync_status = fields.Selection(
+        [
+            ('pending', 'Pending Sync'),
+            ('synced', 'Synced'),
+            ('failed', 'Sync Failed'),
+        ],
+        string='Sync Status',
+        default='pending',
+        readonly=True,
+        help='Indicates the sync status of the transaction with Nayax.',
+    )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+         print('999999999999999999999999999999999999')
+         secret_key = generate_key()  # Generate the key for decryption
+
+         config = self.env['ir.config_parameter'].sudo()
+         encrypted_access_token = config.get_param('external_access_token')
+         if not encrypted_access_token:
+             raise UserError(
+                 _('Authentication Token Missing\nPlease log in to the Sirius Model first.')
+             )
+         access_token = decrypt_data(encrypted_access_token, secret_key)
+         
+         # Ensure sync_status is set to 'pending' during creation
+         for vals in vals_list:
+             vals['sync_status'] = 'pending'
+        
+         orders = super().create(vals_list)
+         return orders
+
+    @api.model
+    def _process_order(self, order, existing_order):
+         """Override the method to add a print statement and call the super method."""
+         # Add your custom print statement
+         print('***********************************************************************')
+         result = super(PosOrder, self)._process_order(order, existing_order)
+         if existing_order:
+             
+             print(order)
+             self.update_order_draft(order)
+         return result
+
+    def write(self, values):
+        """
+        Override the write method to ensure add_order is called only once per order
+        and only after calling the parent write method.
+        """
+        # Debug statement
+        print('55555555555599999999999999999999999999999999 - Write method start')
+
+        # Call the original write method first
+        result = super(PosOrder, self).write(values)
+
+        # Check conditions and call add_order if needed
+        for order in self:
+            print(f"Order {order.name} state: {order.state}, order_draft_id: {order.order_draft_id}, sync_status: {order.sync_status} - Before add_order check")
+            if order.state == 'paid' and order.order_draft_id == 0 and order.sync_status == 'pending':
+                print(f"Order {order.name} - add_order method is called")
+                order.add_order(order)
+            print(f"Order {order.name} state: {order.state}, order_draft_id: {order.order_draft_id}, sync_status: {order.sync_status} - Write method end")
+
+        # Return the result of the super write method
+        return result
+
+    def add_order(self, order):
+        print('basharbasharbasharbasharbasharbasharbasharbasharbashar - add_order method start')
+        api_url = "https://gateway-api-srv.stage.bnayax.com/api/transaction-draft"
+        secret_key = generate_key()  # Generate the key for decryption
+
+        config = self.env['ir.config_parameter'].sudo()
+        token = get_token(config)
+
+        # Now we can safely strip the token
+        headers = {
+            "Authorization": f"Bearer {token.strip()}",
+            "Cache-Control": "no-cache",
+            "Content-Type": "application/json",
+            "Accept": "application/vnd.transaction-upitec.v1.0+json",
+            "User-Agent": "PostmanRuntime/7.43.0"
+
+        }
+        payload = self.payelod_data(order)
+        
+        try:
+                print(f"Debug: Sending request for template ID:")
+                _logger.info(f"Debug: Payload: {json.dumps(payload)}") # Log the payload
+                
+                response = requests.post(api_url, json=payload, headers=headers)
+                is_expired, response_json =   handle_request_with_relogin(api_url,payload, "POST" ,headers,config ,secret_key)
+
+                response.raise_for_status()  # Raise exception for HTTP errors
+                print(f"Debug: Request sent successfully for template ID ")
+                print(f"Debug: Response: {response_json}")
+
+
+                if response_json.get("status") == "OK":
+                        # Update both the draft ID and the sync status
+                        order.write({
+                            'order_draft_id': response_json.get("data", {}).get("id"),
+                            'sync_status': 'synced'
+                        })
+                        print(order.order_draft_id)
+                else:
+                        # Update sync status to failed
+                        order.write({'sync_status': 'failed'})
+                        _logger.error(f"API call failed. Response: {response_json}")
+                        
+        except requests.exceptions.RequestException as e:
+                # Update sync status to failed on exception
+                order.write({'sync_status': 'failed'})
+                _logger.error(f"Failed to send data to the API: {e}")
+                raise UserError(f"Failed to send data to the API: {e}")
+        print('basharbasharbasharbasharbasharbasharbasharbasharbashar - add_order method end')
+
+    def get_order_by_draft_id(self,order):
+         order_draft_id = order.get('order_draft_id')
+         print(order_draft_id)
+         api_url = f"https://gateway-api-srv.stage.bnayax.com/api/transaction-draft/{order_draft_id}"
+         secret_key = generate_key()  # Generate the key for decryption
+
+         config = self.env['ir.config_parameter'].sudo()
+         token = get_token(config)
+
+         # Now we can safely strip the token
+         headers = {
+         "Authorization": f"Bearer {token.strip()}",
+         }
+         try:
+                 print(f"Debug: Sending GET request for template ID: {order_draft_id}")
+                 is_expired, response_json =   handle_request_with_relogin(api_url,'', "GET" ,headers,config ,secret_key)
+                 print( response_json)
+                 return response_json
+         except requests.exceptions.RequestException as e:
+              _logger.error(f"Failed to fetch item data: {e}")
+              raise UserError(f"Failed to fetch item data: {e}")
+
+    def update_order_draft(self, order):
+         order_befor_update = self.get_order_by_draft_id(order)
+         order_draft_id = order.get('order_draft_id')
+
+         api_url = f"https://gateway-api-srv.stage.bnayax.com/api/transaction-draft/{order_draft_id}"
+         secret_key = generate_key()  # Generate the key for decryption
+
+         config = self.env['ir.config_parameter'].sudo()
+         #self.env['api.auth'].search([], order="id desc", limit=1)
+         token = get_token(config)
+
+         headers = {
+             "Authorization": f"Bearer {token.strip()}",
+             "Content-Type": "application/json",
+         }   
+         guid = order_befor_update.get('data', {}).get('guid')
+         print(guid)
+         payload =self.payelod_data_update(order,guid)
+
+         print(payload)
+         
+         try:
+             print(f"Debug: Sending PUT request for template ID: {order_draft_id}")
+             is_expired, response_json =   handle_request_with_relogin(api_url,payload, "PUT" ,headers,config ,secret_key)
+             print(f"Debug: Response: {response_json}")
+
+         except requests.exceptions.RequestException as e:
+              _logger.error(f"Failed to send data to the API: {e}")
+              raise UserError(f"Failed to send data to the API: {e}")
+
+    def _format_datetime(self, dt_value):
+            """Formats a datetime object to the required string format."""
+            if not dt_value:
+                return None
+            if isinstance(dt_value, str):
+                 dt_value = datetime.strptime(dt_value, "%Y-%m-%d %H:%M:%S.%f")
+            return dt_value.strftime("%Y-%m-%dT%H:%M:%S.") + f'{dt_value.microsecond // 1000:03d}Z'
+
+
+    def payelod_data(self,order):
+        print(order.read()[0]) 
+        order_data = order.read()[0]
+
+
+        cashierNumber =    order_data['user_id'][0]
+        # openTransactionEmployeeId = order_data['employee_id']
+        if order_data['partner_id']:
+            partnerCode = order_data['partner_id'][0]
+            partnername = order_data['partner_id'][1]
+            name_parts = partnername.split(' ', 1)
+            first_name = name_parts[0]
+            last_name = name_parts[1] if len(name_parts) > 1 else ''
+        else:
+            partnerCode = None
+            first_name = None
+            last_name = None
+
+        amount = order_data['amount_paid']
+        currencyAmount = order_data['amount_paid']
+
+        tip_tender_list_amount = order_data['amount_difference'] 
+        tip_tender_List_currency_amount= order_data['amount_difference'] 
+        # Generate a unique draft transaction number using order ID and a timestamp
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]  # Use milliseconds for more precision
+        draftTransactionNumber = f"{order_data['id']}-{timestamp}"
+        transactionRemarks = order_data['name']
+
+
+        # Ensure that 'create_date' and 'write_date' are in the correct format
+        draftTransactionDate = self._format_datetime(order_data['create_date'])
+        transactionStartDateTime = self._format_datetime(order_data['write_date'])
+        updateDraftStatusDateTime =  self._format_datetime(order_data['create_date'])
+
+        items = []
+
+        # Fetch all order lines
+        order_lines = self.env['pos.order.line'].search([('order_id', '=', order_data['id'])])
+
+        # Iterate through each order line and construct the JSON data
+        for line in order_lines:
+            item_amount = line.price_subtotal_incl
+            product = self.env['product.product'].search([('id', '=', line.product_id.id)], limit=1)
+            if product:
+                sirius_item_id = product.sirius_item_id
+            else:
+                sirius_item_id = None
+            item_code = sirius_item_id  # Assuming 'default_code' as the item code
+            item_name = line.full_product_name
+            line_number = line.id
+            item_price = line.price_unit
+            item_qty = line.qty
+            vat_amount = line.price_subtotal_incl - line.price_subtotal  # VAT amount calculation
+
+            # Modifier extraction logic
+            modifiers = []
+            print(f"Processing item1: {line.full_product_name}")
+            if '(' in line.full_product_name and ')' in line.full_product_name:
+                try:
+                    modifier_str = line.full_product_name.split('(', 1)[1].rsplit(')', 1)[0]
+                    modifier_names = [mod.strip() for mod in modifier_str.split(',')]
+
+                    for mod_name in modifier_names:
+                        # Find the modifier in product.template.attribute.value model
+                        modifier_record = self.env['product.template.attribute.value'].search([('name', '=', mod_name)], limit=1)
+                        modifier_price = modifier_record.price_extra if modifier_record else 0.0
+                        print(f"Modifier Product: {mod_name}, Price: {modifier_price}")
+                        modifiers.append({
+                            "itemModifierName": mod_name,
+                            "price": modifier_price,  # Get the price from model
+                            "quantity": 1,
+                        })
+                except:
+                    print("Error in modifiers1")
+
+            # Append the formatted item data to the list
+            items.append({
+                "amount": item_amount,
+                "itemCode": str(item_code) if item_code else "1000",  
+                "itemName": item_name,
+                "lineNumber": line_number,
+                "price": item_price,
+                "quantity": item_qty,
+                "vatAmount": vat_amount,
+                "modifiers":modifiers,
+            })
+
+
+        # Print the JSON structure
+    
+        payload = {
+                "cashierNumber": cashierNumber,
+                "openTransactionEmployeeId": 1,
+                "createAbsentObjects": False,
+                "posCode": "1",
+                "storeCode": "1",
+                "items":items,
+                "partners": [
+                    {
+                        "partnerCode": partnerCode,
+                        "partnerFirstName": first_name,
+                        "partnerlastName": last_name
+                    }
+                ],
+                "payments": {
+                    "cashList": [
+                        {
+                            "amount": amount,
+                            "cashRounding": False,
+                            "currencyAmount": currencyAmount,
+                            "currencyCode": "1",
+                            "guid": "d69edcf8-dae9-4fe0-a015-b78d6249a5d8"
+                        }
+                    ],
+                    "tipTenderList": [
+                        {
+                            "amount": tip_tender_list_amount,
+                            "linked": "d69edcf8-dae9-4fe0-a015-b78d6249a5d8",
+                            "currencyAmount": tip_tender_List_currency_amount,
+                            "currencyCode": "NIS",
+                            "guid": "84f4236e-87b4-44e4-b6c8-6c56fcbac0e0"
+                        }
+                    ]
+                },
+                "status": 0,
+                "draftTransactionDate": draftTransactionDate,
+                "draftTransactionNumber": 10009,
+                "transactionRemarks": transactionRemarks,
+                "transactionStartDateTime": transactionStartDateTime,
+                "transactionType": 1,
+                "draftTransactionStatus": "OPENED",
+                "updateDraftStatusDateTime": updateDraftStatusDateTime,
+                "extendedData": {
+                    "kioskServiceType": "2"
+                }
+            }
+        return payload   
+
+    def payelod_data_update(self, order, guid):
+        cashierNumber = order.get('user_id') # Ensure it's set to 100 or dynamically based on some logic if needed
+        partner_id = order.get('partner_id')
+        partnerCode = partner_id[0] if isinstance(partner_id, (list, tuple)) else None
+        partnerName = partner_id[1] if isinstance(partner_id, (list, tuple)) and len(partner_id) > 1 else ''
+
+        name_parts = partnerName.split(' ', 1)
+        first_name = name_parts[0] if partnerName else None
+        last_name = name_parts[1] if len(name_parts) > 1 else None
+
+        amount = order.get('amount_paid', 0)
+        currencyAmount = amount
+
+        tip_tender_list_amount = order.get('amount_difference', 0)
+        tip_tender_List_currency_amount = tip_tender_list_amount
+        draftTransactionNumber = f"{order.get('id', 0):04d}"
+        transactionRemarks = order.get('name', '')
+
+        # Ensure that 'create_date' and 'write_date' are properly formatted
+
+        draftTransactionDate = self._format_datetime(order.get('create_date'))
+        transactionStartDateTime = self._format_datetime(order.get('write_date'))
+        
+        items = []
+
+        # Fetch all order lines
+        order_lines = self.env['pos.order.line'].search([('order_id', '=', order.get('id'))])
+
+
+        # Iterate through each order line and construct the JSON data
+        for line in order_lines:
+            item_amount = line.price_subtotal_incl
+            product = self.env['product.product'].search([('id', '=', line.product_id.id)], limit=1)
+            sirius_item_id = product.sirius_item_id if product else None
+
+            # Modifier extraction logic
+            modifiers = []
+            print(f"Processing item2: {line.full_product_name}")
+            if '(' in line.full_product_name and ')' in line.full_product_name:
+                try:
+                    modifier_str = line.full_product_name.split('(', 1)[1].rsplit(')', 1)[0]
+                    modifier_names = [mod.strip() for mod in modifier_str.split(',')]
+                    for mod_name in modifier_names:
+                        # Find the modifier in product.template.attribute.value model
+                        modifier_record = self.env['product.template.attribute.value'].search([('name', '=', mod_name)], limit=1)
+                        modifier_price = modifier_record.price_extra if modifier_record else 0.0  # Get the price from the model
+                        modifiers.append({
+                            "itemModifierName": mod_name,
+                            "price": modifier_price,  # Get the price from model
+                            "quantity": 1,
+                        })
+                except:
+                    print("Error in modifiers2")
+            
+            items.append({
+                "amount": item_amount,
+                "itemCode": str(sirius_item_id or 1000),  # Ensure itemCode is a string
+                "itemName": line.full_product_name,
+                "lineNumber": line.id,
+                "price": line.price_unit,
+                "quantity": line.qty,
+                "vatAmount": line.price_subtotal_incl - line.price_subtotal,
+                 "modifiers":modifiers,
+            })
+
+        payload = {
+            "cashierNumber": cashierNumber,
+            "openTransactionEmployeeId": 1,
+            "createAbsentObjects": False,
+            "posCode": "1",
+            "storeCode": "1",
+            "guid": guid,
+            "items": items,
+            "partners": [
+                {
+                    "partnerCode": partnerCode,
+                    "partnerFirstName": first_name,
+                    "partnerlastName": last_name
+                }
+            ],
+            "payments": {
+                "cashList": [
+                    {
+                        "amount": amount,
+                        "cashRounding": False,
+                        "currencyAmount": currencyAmount,
+                        "currencyCode": "1",
+                        "guid": "d69edcf8-dae9-4fe0-a015-b78d6249a5d8"
+                    }
+                ],
+                "tipTenderList": [
+                    {
+                        "amount": tip_tender_list_amount,
+                        "linked": "d69edcf8-dae9-4fe0-a015-b78d6249a5d8",
+                        "currencyAmount": tip_tender_List_currency_amount,
+                        "currencyCode": "NIS",
+                        "guid": "84f4236e-87b4-44e4-b6c8-6c56fcbac0e0"
+                    }
+                ]
+            },
+            "status": 0,
+            "draftTransactionDate": draftTransactionDate,
+            "draftTransactionNumber": draftTransactionNumber,
+            "transactionRemarks": transactionRemarks,
+            "transactionStartDateTime": transactionStartDateTime,
+            "transactionType": 1,
+            "draftTransactionStatus": "OPENED",
+            "updateDraftStatusDateTime": transactionStartDateTime,
+            "extendedData": {
+                "kioskServiceType": "2"
+            }
+        }
+
+        return payload
