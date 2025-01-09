@@ -6,20 +6,25 @@
             <field name="name">api.auth.form</field>
             <field name="model">api.auth</field>
             <field name="arch" type="xml">
-                <form string="Sirius" style="width: 60%; margin: 0 auto; padding: 20px; height: 1200px;">
+                <form string="Sirius" style="width: 50%; margin: 50px auto; padding: 30px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background-color: #f9f9f9;">
                     <sheet style="padding: 20px;">
-                        <group>
-                            <field name="login" placeholder="Enter Login"/>
-                            <field name="password" placeholder="Enter Password" password="True"/>
+                        <group style="display: flex; flex-direction: column; gap: 15px;">
+                            <div style="display: flex; flex-direction: column;">
+                                <label for="login" style="margin-bottom: 5px; font-weight: bold;">Login</label>
+                                <field name="login" placeholder="Enter Login" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;"/>
+                            </div>
+                            <div style="display: flex; flex-direction: column;">
+                                <label for="password" style="margin-bottom: 5px; font-weight: bold;">Password</label>
+                                <field name="password" placeholder="Enter Password" password="True" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;"/>
+                             </div>
                         </group>
 
-
-                        <div style="margin-top: 20px; margin-bottom: 20px; display: flex; gap: 10px;">
-                            <button name="authenticate" type="object" string="Login" class="btn-primary" style="width: auto;"/>
-                            <button name="send_all_products_to_api" type="object" string="Export Items To Sirius" class="btn-success" style="width: auto;" />
-                            <button name="import_transactions" type="object" string="Import Transactions From Sirius" class="btn-info" style="width: auto;" />
-                            <button name="export_all_items" type="object" string="Export Items From Sirius" class="btn-info" style="width: auto;" />
-                            <!-- <button name="export_all_hierarchy" type="object" string="Export Items From Sirius" class="btn-success" style="width: auto;" /> -->
+                         <div style="margin-top: 30px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+                            <button name="authenticate" type="object" string="Login" class="btn btn-primary" style="padding: 10px 20px; border: none; border-radius: 4px; color: white; background-color: #007bff; cursor: pointer;"/>
+                            <button name="send_all_products_to_api" type="object" string="Export Items To Sirius" class="btn btn-success" style="padding: 10px 20px; border: none; border-radius: 4px; color: white; background-color: #28a745; cursor: pointer;"/>
+                            <button name="import_transactions" type="object" string="Import Transactions From Sirius" class="btn btn-info" style="padding: 10px 20px; border: none; border-radius: 4px; color: white; background-color: #17a2b8; cursor: pointer;"/>
+                            <button name="export_all_items" type="object" string="Import Items From Sirius" class="btn btn-info" style="padding: 10px 20px; border: none; border-radius: 4px; color: white; background-color: #17a2b8; cursor: pointer;"/>
+                            <button name="export_all_modifiers" type="object" string="Import Modifiers From Sirius" class="btn btn-info" style="padding: 10px 20px; border: none; border-radius: 4px; color: white; background-color: #17a2b8; cursor: pointer;"/>
 
                         </div>
                     </sheet>

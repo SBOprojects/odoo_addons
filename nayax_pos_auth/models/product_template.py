@@ -11,6 +11,7 @@ class ProductTemplate(models.Model):
     sirius_item_id = fields.Integer("API Item ID", readonly=True)
     is_modifier = fields.Boolean("Is Modifier", default=False)
     prices = fields.Char("Prices")
+    list_price = fields.Float(digits=(12, 6)) # This change will tell the system to expect more decimals.
 
 
     @api.model_create_multi

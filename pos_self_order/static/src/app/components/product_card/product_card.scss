@@ -1,5 +1,6 @@
 .self_order_product_card {
-    position: relative
+    position: relative; /* Maintain positioning context */
+    text-align: center; /* Center the content within the card */
 }
 
 .scale-up {
@@ -26,6 +27,7 @@
     left: 22px;
     top: 4px;
 }
+
 
 .o_self_order_item_card_no_image {
     span {

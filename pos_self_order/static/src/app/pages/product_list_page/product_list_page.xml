@@ -29,7 +29,7 @@
                 overflow-y: hidden !important;
                 justify-content: flex-start !important;
                 max-width: none !important;
-                 max-height: 170px; /* Set a fixed height to allow horizontal scroll */
+                 max-height: 130px; /* Set a fixed height to allow horizontal scroll */
                  align-items: normal !important; /* Remove the center alignment from this specific class */
             }
 
@@ -44,7 +44,7 @@
             /* Adjust child categories for better fit */
              #listgroup-categories .child-category {
                  width: 120px;
-                height: 150px;
+                height: 100px;
                 padding: 8px;
                 font-size: 0.7rem;
                 border-radius: 8px;
@@ -58,7 +58,6 @@
              /* Apply specific styles to the categories when they are shown on the nav bar on subcategories view*/
              #listgroup-categories.horizontal-scroll .category-item {
                 display: flex;
-                flex-direction: column;  /* Added to align items vertically */
                 align-items: center !important;
                 padding: 10px !important;
                 border: 1px solid #dee2e6;
@@ -66,7 +65,7 @@
                 background-color: #f8f9fa;
                 margin-right: 8px !important;
                 box-sizing: border-box !important;
-                height: auto !important;
+                height: 100px !important;
             }
              /* Hide the ratio container */
              #listgroup-categories.horizontal-scroll .category-item .ratio {
@@ -91,24 +90,42 @@
                 scroll-behavior: smooth;
             }
 
-            /* Handle different screen sizes */
+            /* Modify .o-so-products-row to use grid layout for products */
+             .o-so-products-row {
+               display: grid !important;
+               grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+                gap: 10px;
+            }
+             .o-so-products-row > * {
+                 width: auto !important;
+            }
+           /* Handle different screen sizes */
            /* Default grid layout for larger screens */
             @media (min-width: 769px) {
                 #listgroup-categories {
                     grid-template-columns: repeat(3, 1fr) !important;
                 }
+              .o-so-products-row {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+             }
             }
 
             @media (min-width: 1050px) and (max-width: 1449px) {
                 #listgroup-categories {
                     grid-template-columns: repeat(4, 1fr) !important;
                 }
+              .o-so-products-row {
+               grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+             }
             }
 
             @media (min-width: 1450px) {
                 #listgroup-categories {
                     grid-template-columns: repeat(5, 1fr) !important;
                 }
+              .o-so-products-row {
+               grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)) !important;
+             }
             }
             /* Make the categories grid based on the screen width*/
              @media (max-width: 768px) {
@@ -118,12 +135,15 @@
                      overflow-x: hidden !important;
                      overflow-y: auto !important;
                       justify-content: center !important;
-                      max-height: calc(100vh - 75px);
+                      <!-- max-height: calc(100vh - 75px); -->
                 }
 
                 #listgroup-categories .parent-category, #listgroup-categories .child-category {
                      height: auto;
                  }
+                  .o-so-products-row {
+                    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+                  }
             }
 
 
@@ -165,12 +185,26 @@
               100% { transform: rotate(360deg); }
             }
 
+             .navbar-container.shrunk {
+                height: 60px; /* Adjust the shrunk height */
+            }
 
+            .navbar-container.shrunk #listgroup-categories{
+                height: 0px; /* Set the categories container height to 0 when shrunk */
+                padding: 0px !important;
+                display: none !important;
+             }
+
+
+            .navbar-container.shrunk .back-button {
+              margin-top: 10px; /* Align the back button vertically */
+              margin-left: 10px;
+             }
         </style>
 
         <div class="d-flex flex-column vh-100">
             <!-- Categories selector + Search -->
-            <div class="navbar-container position-relative w-100 bg-view border-bottom z-1">
+            <div t-attf-class="navbar-container position-relative w-100 bg-view border-bottom z-1 #{selfOrder.currentCategoryStack.length > 1 and !this.getCategoriesToDisplay().length ? 'shrunk' : ''}">
                   <!-- Back Button -->
                     <t t-if="selfOrder.currentCategoryStack.length > 1">
                          <div class="category-item back-button"

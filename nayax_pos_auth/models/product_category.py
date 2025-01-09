@@ -26,9 +26,14 @@ class PosCategory(models.Model):
             else:
                 self.create(data)
 
-
-class PosCategory(models.Model):
+class ProductAttributeValue(models.Model):
     _inherit = 'product.attribute.value'
 
     sirius_item_id = fields.Integer("API Item ID", readonly=True)
-    
+    sirius_group_id = fields.Integer("API Group ID", readonly=True)
+
+class ProductAttribute(models.Model):
+    _inherit = 'product.attribute'
+
+    sirius_item_id = fields.Integer("API Item ID", readonly=True)
+    sirius_group_id = fields.Integer("API Group ID", readonly=True)

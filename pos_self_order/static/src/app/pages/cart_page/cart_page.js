@@ -49,11 +49,12 @@ export class CartPage extends Component {
         const type = this.selfOrder.config.self_ordering_mode;
         const takeAway = this.selfOrder.currentOrder.takeaway;
 
+        // Basic checks:
         if (this.selfOrder.rpcLoading || !this.selfOrder.verifyCart()) {
             return;
-
         }
 
+        // Table assignment logic for "table" mode:
         if (
             type === "mobile" &&
             orderingMode === "table" &&
@@ -68,10 +69,77 @@ export class CartPage extends Component {
             });
         }
 
-        this.selfOrder.rpcLoading = true;
-        await this.selfOrder.confirmOrder();
-        this.selfOrder.rpcLoading = false;
+
+
+        // this.selfOrder.rpcLoading = true;
+        // await this.selfOrder.confirmOrder();  // <--- ensures `amount_total` is now correct
+        // this.selfOrder.rpcLoading = false;
+
+        // 2) Generate your Nayax signature (same as you do in ConfirmationPage)
+        const hash = await this.generateHash();
+
+        console.log("Hash value: ", hash);
+        console.log("here-------------------");
+        // 3) Open Nayax page directly (just like openNayaxPage)
+        this.redirectToNayax(hash);
+
+        // DO NOT navigate to the confirmation screen.
     }
+    async generateHash() {
+        const amount = this.selfOrder.currentOrder.get_total_with_tax() || 0;
+        const id = this.selfOrder.currentOrder.id || 0;
+        console.log(amount);
+        console.log(id);
+
+        // Convert the input string into a Uint8Array
+        const encoder = new TextEncoder();
+        const data = encoder.encode(`6312841${id}180${amount}ILSPurchase0he-ilauto39YVLZ32VH`);
+
+        // Use the SubtleCrypto API to generate the SHA-256 hash
+        const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+
+        // Convert the ArrayBuffer to a Base64 string
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashBase64 = btoa(String.fromCharCode(...hashArray));
+
+        // Return the encoded Base64 hash
+        return decodeURIComponent(hashBase64);
+    }
+    redirectToNayax(signature) {
+        // If you need the order ID and amount:
+        const orderId = this.selfOrder.currentOrder.id || 0;
+        const amount = this.selfOrder.currentOrder.get_total_with_tax() || 0;
+        console.log("Redirecting to Nayax...");
+        console.log(orderId);
+        console.log(amount);
+        console.log(signature);
+        console.log(this.selfOrder.currentOrder);
+        // Build your URLSearchParams (same as your <form> hidden fields)
+        const params = new URLSearchParams({
+            merchantID: "6312841",
+            url_redirect: "",
+            url_notify: "",
+            trans_comment: "",
+            trans_refNum: orderId,
+            Brand: "",
+            trans_installments: "1",
+            amount_options: "",
+            ui_version: "8",
+            trans_type: "0",
+            trans_amount: amount,
+            trans_currency: "ILS",
+            disp_paymentType: "",
+            disp_payFor: "Purchase",
+            disp_recurring: "0",
+            disp_lng: "he-il",
+            disp_mobile: "auto",
+            signature: signature,
+        });
+
+        // Redirect to Nayax
+        window.location.href = `https://uiservices.ecom.nayax.com/hosted//?${params.toString()}`;
+    }
+
 
     selectTable(table) {
         if (table) {
