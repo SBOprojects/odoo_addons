@@ -1,217 +1,346 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.ProductListPage">
-        <style>
-            /* Ensure overflow and scrolling behavior for categories */
-            #listgroup-categories {
-                display: grid !important;
-                gap: 1.5rem !important;
-                overflow-y: auto !important;
-                overflow-x: hidden !important;
-                scroll-behavior: smooth;
-                align-items: center;
-                justify-content: center;
-                padding: 10px;
-                box-sizing: border-box !important;
-                max-height: calc(100vh - 100px);
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-            }
-
-            #listgroup-categories::-webkit-scrollbar {
-                display: none;
-            }
-
-            /* Horizontal Scroll is applied if screen too small*/
-            #listgroup-categories.horizontal-scroll {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                overflow-x: auto !important;
-                overflow-y: hidden !important;
-                justify-content: flex-start !important;
-                max-width: none !important;
-                 max-height: 130px; /* Set a fixed height to allow horizontal scroll */
-                 align-items: normal !important; /* Remove the center alignment from this specific class */
-            }
-
-
-            /* Scrolling products list with consistent overflow handling */
-            .product-list-container {
-                flex-grow: 1;
-                overflow-y: auto !important;
-                scroll-behavior: smooth;
-            }
-
-            /* Adjust child categories for better fit */
-             #listgroup-categories .child-category {
-                 width: 120px;
-                height: 100px;
-                padding: 8px;
-                font-size: 0.7rem;
-                border-radius: 8px;
-                flex: 0 0 auto; /* prevent flex shrink */
-             }
-
-            #listgroup-categories .parent-category{
-                 flex: 0 0 auto; /* prevent flex shrink */
-             }
-
-             /* Apply specific styles to the categories when they are shown on the nav bar on subcategories view*/
-             #listgroup-categories.horizontal-scroll .category-item {
-                display: flex;
-                align-items: center !important;
-                padding: 10px !important;
-                border: 1px solid #dee2e6;
-                border-radius: 8px;
-                background-color: #f8f9fa;
-                margin-right: 8px !important;
-                box-sizing: border-box !important;
-                height: 100px !important;
-            }
-             /* Hide the ratio container */
-             #listgroup-categories.horizontal-scroll .category-item .ratio {
-                display: none !important;
-             }
-            /* Ensure text in subcategories is visible */
-            #listgroup-categories.horizontal-scroll .category-item .category-name {
-                display: flex !important; /* or block as necessary*/
-                margin-top: 0px !important;
-                font-size: 0.9rem !important;
-                width: 100%; /*Ensure text takes up space*/
-                text-align: center; /*Align to center*/
-                justify-content: center;
-            }
-             #listgroup-categories.horizontal-scroll .category-item  small{
-                   display: block !important;
-             }
-            /* Products container scroll settings */
-            .product-list-category {
-                max-height: calc(100vh - 200px);
-                overflow-y: auto !important;
-                scroll-behavior: smooth;
-            }
-
-            /* Modify .o-so-products-row to use grid layout for products */
-             .o-so-products-row {
-               display: grid !important;
-               grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
-                gap: 10px;
-            }
-             .o-so-products-row > * {
-                 width: auto !important;
-            }
-           /* Handle different screen sizes */
-           /* Default grid layout for larger screens */
-            @media (min-width: 769px) {
+               <style>
+                /* Ensure overflow and scrolling behavior for categories */
                 #listgroup-categories {
-                    grid-template-columns: repeat(3, 1fr) !important;
-                }
-              .o-so-products-row {
-                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
-             }
-            }
-
-            @media (min-width: 1050px) and (max-width: 1449px) {
-                #listgroup-categories {
-                    grid-template-columns: repeat(4, 1fr) !important;
-                }
-              .o-so-products-row {
-               grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
-             }
-            }
-
-            @media (min-width: 1450px) {
-                #listgroup-categories {
-                    grid-template-columns: repeat(5, 1fr) !important;
-                }
-              .o-so-products-row {
-               grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)) !important;
-             }
-            }
-            /* Make the categories grid based on the screen width*/
-             @media (max-width: 768px) {
-                #listgroup-categories {
-                    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
-                     display: grid !important;
-                     overflow-x: hidden !important;
-                     overflow-y: auto !important;
-                      justify-content: center !important;
-                      <!-- max-height: calc(100vh - 75px); -->
+                    display: grid !important;
+                    gap: 1.5rem !important;
+                    overflow-y: auto !important;
+                    overflow-x: hidden !important;
+                    scroll-behavior: smooth;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 10px;
+                    box-sizing: border-box !important;
+                    max-height: calc(100vh - 100px);
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                    background-color: rgba(238, 238, 238, var(--bg-opacity, 1));
                 }
 
-                #listgroup-categories .parent-category, #listgroup-categories .child-category {
-                     height: auto;
-                 }
-                  .o-so-products-row {
+                .o-so-products-row > * {
+                    flex-shrink: 0;
+                    width: 100%;
+                    max-width: 100%;
+                    padding-left: 0 !important; /* Remove padding left */
+                    padding-right: 0 !important; /* Remove padding right */
+                    margin-top: 4px !important; /* Reduce margin top */
+                    margin-left: 4px !important;
+                    margin-right: 4px !important;
+                }
+
+                #listgroup-categories::-webkit-scrollbar {
+                    display: none;
+                }
+
+                /* Horizontal Scroll is applied if screen too small*/
+                #listgroup-categories.horizontal-scroll {
+                    display: flex !important;
+                    flex-wrap: nowrap !important;
+                    overflow-x: auto !important;
+                    overflow-y: hidden !important;
+                    justify-content: flex-start !important;
+                    max-width: none !important;
+                    max-height: 130px;
+                    /* Set a fixed height to allow horizontal scroll */
+                    align-items: normal !important;
+                    /* Remove the center alignment from this specific class */
+                }
+
+                /* Scrolling products list with consistent overflow handling */
+                .product-list-container {
+                    flex-grow: 1;
+                    overflow-y: auto !important;
+                    scroll-behavior: smooth;
+                }
+
+                /* Adjust child categories for better fit */
+                #listgroup-categories .child-category {
+                    width: 120px;
+                    height: 100px;
+                    padding: 8px;
+                    font-size: 0.7rem;
+                    border-radius: 8px;
+                    flex: 0 0 auto;
+                    /* prevent flex shrink */
+                }
+
+                #listgroup-categories .parent-category {
+                    flex: 0 0 auto;
+                    /* prevent flex shrink */
+                    background-color: white;
+                    /* White Background */
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                    /* Box Shadow */
+                    border-radius: 8px;
+                    display: flex;
+                    flex-direction: column;
+                    /*stack icon/image on top of name*/
+                    align-items: center;
+                    /*center content*/
+                    justify-content: center;
+                    padding: 10px;
+                    height: auto !important;
+                    /* Set the height for the parent category*/
+                    width: auto !important;
+                    min-width: 150px;
+                }
+
+                /* Remove padding from images in main categories */
+                #listgroup-categories .parent-category .ratio {
+                    padding: 0 !important;
+                }
+
+                /* Apply specific styles to the categories when they are shown on the nav bar on subcategories view*/
+                #listgroup-categories.horizontal-scroll .category-item {
+                    display: flex;
+                    align-items: center !important;
+                    padding: 10px !important;
+                    border: 1px solid #dee2e6;
+                    border-radius: 8px;
+                    background-color: #f8f9fa;
+                    margin-right: 8px !important;
+                    box-sizing: border-box !important;
+                    height: 100px !important;
+                    border-bottom: none !important;
+                    /*remove sub child border*/
+                }
+
+                /* Hide the ratio container */
+                #listgroup-categories.horizontal-scroll .category-item .ratio {
+                    display: none !important;
+                }
+
+                /* Ensure text in subcategories is visible */
+                #listgroup-categories.horizontal-scroll .category-item .category-name {
+                    display: flex !important;
+                    /* or block as necessary*/
+                    margin-top: 0px !important;
+                    font-size: 0.9rem !important;
+                    width: 100%;
+                    /*Ensure text takes up space*/
+                    text-align: center;
+                    /*Align to center*/
+                    justify-content: center;
+                }
+
+                #listgroup-categories.horizontal-scroll .category-item small {
+                    display: block !important;
+                }
+
+                /* Products container scroll settings */
+                .product-list-category {
+                    max-height: calc(100vh - 200px);
+                    overflow-y: auto !important;
+                    scroll-behavior: smooth;
+                }
+
+                /* Modify .o-so-products-row to use grid layout for products */
+                .o-so-products-row {
+                    display: grid !important;
                     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
-                  }
-            }
+                    /* Reduced from 200 to 180 */
+                    gap: 8px;
+                    /*reduced gap*/
+                    padding: 0 10px;
+                    /* Add some side padding to the product container */
+                }
 
+                /* Handle different screen sizes */
+                /* Default grid layout for larger screens */
+                @media (min-width: 769px) {
+                    #listgroup-categories {
+                        grid-template-columns: repeat(3, 1fr) !important;
+                    }
 
-            /* Footer Styles */
-            .o-so-footer {
-                position: sticky;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                z-index: 1000;
-                background-color: white;
-                border-top: 1px solid #dee2e6;
-            }
-             /* Loading Indicator Styles */
-            .loading-overlay {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              background-color: rgba(255, 255, 255, 0.8);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              z-index: 1001;
-            }
+                    .o-so-products-row {
+                        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+                        /* Reduced from 220 to 180 */
+                    }
+                }
 
-            .loading-spinner {
-              border: 8px solid #f3f3f3;
-              border-top: 8px solid #3498db;
-              border-radius: 50%;
-              width: 60px;
-              height: 60px;
-              animation: spin 1s linear infinite;
-            }
+                @media (min-width: 1050px) and (max-width: 1449px) {
+                    #listgroup-categories {
+                        grid-template-columns: repeat(4, 1fr) !important;
+                    }
 
-           @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
+                    .o-so-products-row {
+                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+                        /* Reduced from 250 to 200 */
+                    }
+                }
 
-             .navbar-container.shrunk {
-                height: 60px; /* Adjust the shrunk height */
-            }
+                @media (min-width: 1450px) {
+                    #listgroup-categories {
+                        grid-template-columns: repeat(5, 1fr) !important;
+                    }
 
-            .navbar-container.shrunk #listgroup-categories{
-                height: 0px; /* Set the categories container height to 0 when shrunk */
-                padding: 0px !important;
-                display: none !important;
-             }
+                    .o-so-products-row {
+                        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+                        /* Reduced from 270 to 220 */
+                    }
+                }
 
+                /* Make the categories grid based on the screen width*/
+                @media (max-width: 768px) {
+                    #listgroup-categories {
+                        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+                        display: grid !important;
+                        overflow-x: hidden !important;
+                        overflow-y: auto !important;
+                        justify-content: center !important;
+                        <!--
+                        max-height: calc(100vh - 75px);
+                        -->
+                    }
 
-            .navbar-container.shrunk .back-button {
-              margin-top: 10px; /* Align the back button vertically */
-              margin-left: 10px;
-             }
-        </style>
+                    #listgroup-categories .parent-category,
+                    #listgroup-categories .child-category {
+                        height: auto;
+                    }
+
+                    .o-so-products-row {
+                        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
+                        /* Reduced from 180 to 160 */
+                    }
+                }
+
+                /* Overall Background Color */
+                .d-flex.flex-column.vh-100 {
+                    background-color: #f0f0f0;
+                    /* Light gray background */
+                }
+
+                /* Footer Styles */
+                .o-so-footer {
+                    position: sticky;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    z-index: 1000;
+                    background-color: white;
+                    border-top: 1px solid #dee2e6;
+                }
+
+                /* Loading Indicator Styles */
+                .loading-overlay {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(240, 240, 240, 0.8);
+                    /* Changed to match overall background color */
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1001;
+                }
+
+                .loading-spinner {
+                    border: 8px solid #f3f3f3;
+                    border-top: 8px solid #3498db;
+                    border-radius: 50%;
+                    width: 60px;
+                    height: 60px;
+                    animation: spin 1s linear infinite;
+                }
+
+                @keyframes spin {
+                    0% {
+                        transform: rotate(0deg);
+                    }
+
+                    100% {
+                        transform: rotate(360deg);
+                    }
+                }
+
+                /* Navbar Container Styles */
+                .navbar-container {
+                    transition: height 0.3s ease;
+                    /*smooth transition*/
+                }
+
+                .navbar-container.shrunk {
+                    height: 60px;
+                    /* Adjust the shrunk height */
+                }
+
+                .navbar-container.shrunk #listgroup-categories {
+                    height: 0px;
+                    /* Set the categories container height to 0 when shrunk */
+                    padding: 0px !important;
+                    display: none !important;
+                }
+
+                .navbar-container.shrunk .back-button {
+                    margin-top: 10px;
+                    /* Align the back button vertically */
+                    margin-left: 10px;
+                }
+
+                /* Modern text styles */
+                .back-button span,
+                .category-name,
+                .product-list-category h2 {
+                    font-weight: 600;
+                    /* Semi-bold text */
+                    letter-spacing: 0.5px;
+                    color: #333 !important;
+                    /* Dark gray color for contrast */
+                }
+
+                .navbar-container.shrunk .back-button span {
+                    font-size: 1.1rem !important;
+                    font-weight: 700 !important;
+                }
+
+                .product-list-category h2 {
+                    font-size: 1.3rem;
+                    /* Slightly larger */
+                    margin-bottom: 0.5rem;
+                }
+
+                .back-button i {
+                    font-size: 1.1em;
+                    font-weight: 700 !important;
+                }
+
+                .back-button span {
+                    margin-right: 15px;
+                    /* Add right margin to the span inside back button */
+                }
+
+                /* Match Product List Background */
+                .product-list {
+                    background-color: rgba(238, 238, 238, var(--bg-opacity, 1)) !important;
+                }
+
+                /* Adjust product list top padding dynamically */
+                .product-list {
+                    padding-top: 10px;
+                    /* Minimum padding on top */
+                }
+            </style>
 
         <div class="d-flex flex-column vh-100">
             <!-- Categories selector + Search -->
             <div t-attf-class="navbar-container position-relative w-100 bg-view border-bottom z-1 #{selfOrder.currentCategoryStack.length > 1 and !this.getCategoriesToDisplay().length ? 'shrunk' : ''}">
                   <!-- Back Button -->
                     <t t-if="selfOrder.currentCategoryStack.length > 1">
-                         <div class="category-item back-button"
+                         <div class="category-item back-button d-flex align-items-center justify-content-between"
                             t-on-click="() => this.navigateBack()"
-                            style="align-items: center; cursor: pointer; width: 120px; margin-left: 10px; margin-top: 10px;">
-                            <i class="fa fa-arrow-left" style="font-size: 0.7em; margin-right: 5px;"></i>
-                            <span>Back</span>
+                            style=" cursor: pointer; width: 100%; margin-left: 10px; margin-top: 10px; margin-bottom:10px;">
+                             <div style="display:flex; align-items:center;">
+                                 <i class="fa fa-chevron-left" style="font-size: 0.9em; margin-right: 5px;"></i>
+                             </div>
+
+                            <span t-esc="selfOrder.currentCategory.name" style="font-size: 1rem; text-align:center; margin-right: auto; margin-left: auto;" />
+
+                            <div>
+                                 <!-- Empty div for spacing -->
+                            </div>
                         </div>
                     </t>
                    
@@ -225,7 +354,6 @@
                         <div
                             t-ref="category_{{category.id}}"
                             t-attf-class="category-item #{category.parent_id ? 'child-category' : 'parent-category'}"
-                             t-attf-style="height:#{category.parent_id ? '150px': 'calc(max-content + 100px)'}"
                             t-on-click="() => this.onCategoryClick(category)">
                             <div class="ratio ratio-1x1 mb-2">
                                 <img t-if="category.has_image"
@@ -240,7 +368,7 @@
                                         style="font-size: 0.7rem;" t-esc="category.name" />
                                 </div>
                             </div>
-                            <small t-if="category.has_image" class="d-block fw-bold category-name text-center mt-2" t-esc="category.name" />
+                             <small t-if="category.has_image" class="d-block fw-bold category-name text-center mt-2" t-esc="category.name" />
                            <small t-if="!category.has_image" class="d-block fw-bold category-name text-center mt-2" t-esc="category.name" />
                         </div>
                     </t>
@@ -264,15 +392,17 @@
                         t-attf-id="scrollspy_{{selfOrder.currentCategory?.id}}"
                         t-attf-categId="{{selfOrder.currentCategory?.id}}"
                         t-ref="productsWithCategory_{{selfOrder.currentCategory?.id}}"
-                        class="product-list-category d-empty-none bg-view px-3 pb-4">
+                        class="product-list-category d-empty-none px-3 pb-4"> <!--removed bg-view-->
+                        
                         <t t-set="products" t-value="this.getProductsForCategory(selfOrder.currentCategory) || []" />
                         <t t-set="availableProducts" t-value="products" />
                         <t t-set="nbrItem" t-value="availableProducts.length" />
                         <t t-if="availableProducts.length > 0">
-                            <div class="pt-4 pb-2 px-3 mb-4 mx-n3 bg-200 fw-bold">
+                            <!-- The category name is now in the navigation bar
+                                <div class="pt-4 pb-2 px-3 mb-4 mx-n3 bg-200 fw-bold">
                                 <h2 t-esc="selfOrder.currentCategory.name"/>
                                 <span t-if="selfOrder.currentCategory and !selfOrder.isCategoryAvailable(selfOrder.currentCategory.id)" class="unavailable-text">Unavailable at this time of the day</span>
-                            </div>
+                            </div> -->
                             <div class="o-so-products-row">
                                 <t t-foreach="availableProducts" t-as="product" t-key="product.id">
                                     <ProductCard product="product" currentProductCard="product.id === selfOrder.lastEditedProductId and currentProductCard" />

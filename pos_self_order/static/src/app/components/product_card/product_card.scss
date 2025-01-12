@@ -1,6 +1,18 @@
 .self_order_product_card {
-    position: relative; /* Maintain positioning context */
-    text-align: center; /* Center the content within the card */
+    position: relative;
+    text-align: center;
+    background-color: white;
+    border-radius: 8px; /* Slightly more rounded corners */
+    padding-bottom: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Added shadow */
+    transition: transform .2s ease-in-out, box-shadow .2s ease-in-out; /* Added transition for the shadow */
+    margin: 5px; /* Added some margin to separate the cards a bit */
+    max-width: 200px; /* Reduced width to make them smaller */
+    /* max-height: 300px; you can uncomment this to fix the height of the cards*/
+}
+.self_order_product_card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25); /* Increased shadow on hover */
+    transform: translateY(-2px);/* Add a bit of up movement */
 }
 
 .scale-up {
@@ -28,9 +40,35 @@
     top: 4px;
 }
 
-
 .o_self_order_item_card_no_image {
+    background-color: #f0f0f0; /* Lighter shade of grey */
     span {
-        color: #DFDFDF;
+        color: #000000 !important;
     }
+}
+
+.product-image-container {
+  overflow: hidden;
+  width: 100%;
+  /* max-height: 180px; */ /* set the maximum height for the image to fix the size of the image container */
+  background-color: white;  /* Added: White background for the image container */
+}
+.price-container {
+    font-weight: bold;
+    background-color: #FFCA00 !important; /* Yellow background */
+    color: rgb(0, 0, 0) !important; /* White text */
+    position: absolute; /* to overlap the image*/
+    bottom: 0;  /* stick to the bottom of image*/
+    right: 0; /* stick to the right of image*/
+    border-radius: 0; /* Remove rounded corners */
+    padding: 0.2rem 0.4rem;
+    margin: 0px;
+    font-size: 0.9rem; /* Smaller font size for the price*/
+}
+.o_self_order_item_card_image {
+    width: 100%; /* Make image fill the container horizontally */
+    height: 100%;/* Make the image fill the container vertically*/
+    object-fit: cover; /* Ensure the image covers the area */
+    border-radius: 0; /* Remove any rounded corners */
+    /* object-position: top; if you wanna make it start at the top */
 }
