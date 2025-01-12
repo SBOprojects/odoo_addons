@@ -16,3 +16,50 @@
         flex-direction: inherit;
     }
 }
+
+.payment-confirmation-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #4CAF50;
+    /* Green background for success */
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    z-index: 101;
+    /* Ensure it's on top */
+    font-weight: bold;
+    animation: slideDown 0.3s ease-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .close-banner-btn {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5em;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+
+        &:hover {
+            color: #ddd;
+        }
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}

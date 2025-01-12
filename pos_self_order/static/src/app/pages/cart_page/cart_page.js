@@ -72,7 +72,7 @@ export class CartPage extends Component {
 
 
         // this.selfOrder.rpcLoading = true;
-        // await this.selfOrder.confirmOrder();  // <--- ensures `amount_total` is now correct
+        await this.selfOrder.confirmOrder();  // <--- ensures `amount_total` is now correct
         // this.selfOrder.rpcLoading = false;
 
         // 2) Generate your Nayax signature (same as you do in ConfirmationPage)

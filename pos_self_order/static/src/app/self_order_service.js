@@ -361,7 +361,7 @@ export class SelfOrder extends Reactive {
                 screenMode = payAfter === "meal" ? "order" : "pay";
             }
 
-            this.confirmationPage(screenMode, device, order.access_token);
+            //this.confirmationPage(screenMode, device, order.access_token);
         } else {
             // In meal mode, first time the customer validate his order, we send it to the server
             // and we redirect him to the confirmation page, the next time he validate his order

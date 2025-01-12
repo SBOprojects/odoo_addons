@@ -24,7 +24,7 @@
                             <button name="send_all_products_to_api" type="object" string="Export Items To Sirius" class="btn btn-success" style="padding: 10px 20px; border: none; border-radius: 4px; color: white; background-color: #28a745; cursor: pointer;"/>
                             <button name="import_transactions" type="object" string="Import Transactions From Sirius" class="btn btn-info" style="padding: 10px 20px; border: none; border-radius: 4px; color: white; background-color: #17a2b8; cursor: pointer;"/>
                             <button name="export_all_items" type="object" string="Import Items From Sirius" class="btn btn-info" style="padding: 10px 20px; border: none; border-radius: 4px; color: white; background-color: #17a2b8; cursor: pointer;"/>
-                            <button name="export_all_modifiers" type="object" string="Import Modifiers From Sirius" class="btn btn-info" style="padding: 10px 20px; border: none; border-radius: 4px; color: white; background-color: #17a2b8; cursor: pointer;"/>
+                            <!-- <button name="export_all_modifiers" type="object" string="Import Modifiers From Sirius" class="btn btn-info" style="padding: 10px 20px; border: none; border-radius: 4px; color: white; background-color: #17a2b8; cursor: pointer;"/> -->
 
                         </div>
                     </sheet>

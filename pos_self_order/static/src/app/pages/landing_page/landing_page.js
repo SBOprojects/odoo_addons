@@ -1,7 +1,8 @@
-import { Component, onMounted, onWillStart, onWillUnmount, useRef } from "@odoo/owl";
+import { Component, onMounted, onWillStart, onWillUnmount, useRef, useState } from "@odoo/owl";
 import { useSelfOrder } from "@pos_self_order/app/self_order_service";
 import { useService } from "@web/core/utils/hooks";
 import { LanguagePopup } from "@pos_self_order/app/components/language_popup/language_popup";
+import { Dialog } from "@web/core/dialog/dialog";
 
 export class LandingPage extends Component {
     static template = "pos_self_order.LandingPage";
@@ -11,19 +12,14 @@ export class LandingPage extends Component {
         this.selfOrder = useSelfOrder();
         this.router = useService("router");
         this.dialog = useService("dialog");
-        this.orm = useService("orm"); // add orm service
-        this.carouselRef = useRef("carousel");
+        this.orm = useService("orm");
         this.activeSelected = false;
-        this.carouselInterval = null;
         this.pollingInterval = null;
-        this.orders = []; // To store all pos.order records
-
-
-
-
+        this.orders = [];
+        this.state = useState({ paymentParams: null, order: null, loadingOrder: false, loading: false, paymentConfirmation: false }); // Added loading state and paymentConfirmation state
 
         onWillStart(async () => {
-
+            this.state.loading = true; // Set loading to true
             if (this.selfOrder.config.self_ordering_mode === "kiosk") {
                 const orders = this.selfOrder.models["pos.order"].getAll();
                 for (const order of orders) {
@@ -32,28 +28,22 @@ export class LandingPage extends Component {
                 this.selfOrder.selectedOrderUuid = null;
             }
             try {
-                const orderRecords = await this.orm.searchRead("pos.order", []); // Adjust fields as needed
+                const orderRecords = await this.orm.searchRead("pos.order", []);
                 this.orders = orderRecords;
                 console.log("Fetched pos.orders:", this.orders);
             } catch (error) {
                 console.error("Error fetching pos.orders:", error);
             }
             this.selfOrder.rpcLoading = false;
+            this.state.loading = false; // Set loading to false
         });
 
         onMounted(() => {
-            if (this.selfOrder.config._self_ordering_image_home_ids.length > 1) {
-                const carousel = new Carousel(this.carouselRef.el);
-                this.carouselInterval = setInterval(() => {
-                    carousel.next();
-                }, 5000);
-            }
-           this.startPolling();
+            this.startPolling();
         });
 
         onWillUnmount(() => {
-            clearInterval(this.carouselInterval);
-             clearInterval(this.pollingInterval);
+            clearInterval(this.pollingInterval);
         });
     }
 
@@ -134,11 +124,19 @@ export class LandingPage extends Component {
         const ordersNotDraft = this.selfOrder.models["pos.order"].find((o) => o.access_token);
         return this.selfOrder.ordering && ordersNotDraft;
     }
-    
+
     startPolling() {
-         this.pollingInterval = setInterval(() => {
+        this.pollingInterval = setInterval(() => {
             this.checkUrlForParameters();
-         }, 1000); 
+        }, 1000);
+    }
+
+    async showPaymentParamsDialog(order) {
+        // No dialog, use payment confirmation banner instead.
+    }
+
+    clearPaymentConfirmation() {
+        this.state.paymentConfirmation = false;
     }
 
     async checkUrlForParameters() {
@@ -168,7 +166,7 @@ export class LandingPage extends Component {
             'disp_recurring',
             'disp_mobile',
         ];
-    
+
         const extractedParams = {};
         let hasParams = false;
         paramsToCheck.forEach((param) => {
@@ -177,81 +175,40 @@ export class LandingPage extends Component {
                 hasParams = true;
             }
         });
+
         if (hasParams) {
             console.log("Extracted Payment Parameters:", extractedParams);
-        
+            this.state.loadingOrder = true;
             try {
-                // Fetch the order with the ID equal to trans_refNum
+                // Fetch the order with the external ID equal to trans_refNum
                 const order = await this.orm.searchRead("pos.order", [
                     ["id", "=", extractedParams.trans_refNum]
                 ]);
-        
+
                 console.log("Fetched Order:", order);
-        
+
                 // Make sure order is not empty
                 if (order && order.length > 0) {
-                    const orderId = order[0].id; // Extract the order ID
-        
+                    this.state.order = order[0]; // Store the fetched order
+                    const orderId = order[0].id;
+
                     // Update the amount_paid field
                     await this.orm.write("pos.order", [orderId], {
-                        amount_paid: parseFloat(extractedParams.trans_amount), // Convert to float to ensure it's a number
+                        amount_paid: parseFloat(extractedParams.trans_amount),
                         state: "paid", // Set the state to "paid"
                     });
-        
                     console.log(`Updated order ${orderId} with amount_paid: ${extractedParams.trans_amount}`);
+                    this.state.loadingOrder = false;
+                    this.state.paymentConfirmation = true;
+
                 } else {
                     console.error("Order not found.");
                 }
-            } catch (error) {
-                console.error("Error fetching or updating order:", error);
-            
             }
-        
+            catch (error) {
+                console.error("Error fetching or updating order:", error);
+            }
 
-
-        
-            //  if (currentOrder) {
-            //     console.log("Current Order before RPC:", currentOrder); // Added for Debugging
-                // currentOrder.amount_paid = extractedParams.trans_amount;
-            // this.selfOrder.currentOrder.state = "paid"; // Set the order state to "paid"
-        //     this.selfOrder.currentOrder.update({
-        //     amount_paid: extractedParams.trans_amount ,
-        //     state :"paid"
-        // });
-                // }
-
-                        
-                // const orderIdMatch = currentOrder.id.match(/pos\.order_(\d+)/);
-                // const parsedOrderId = orderIdMatch ? parseInt(orderIdMatch[1], 10) : NaN;
-                
-            //     if (!isNaN(parsedOrderId) && typeof parseFloat(extractedParams.trans_amount) === 'number') {
-            //         try {
-            //             const orderData = {
-            //                 id: parsedOrderId,
-            //                 jsonrpc: "2.0",
-            //                 method: "call",
-            //                 params: {
-            //                     model: "pos.order",
-            //                     method: "sync_from_ui",
-            //                     args: [[{
-            //                         id: parsedOrderId,
-            //                         amount_paid: parseFloat(extractedParams.trans_amount),
-            //                         state: "paid",
-            //                         // Add other necessary fields here
-            //                     }]],
-            //                 },
-            //             };
-            //             await this.orm.call(orderData);
-            //             console.log("Order updated on the server");
-            //         } catch (error) {
-            //             console.error("Error updating order on server:", error);
-            //         }
-            //     } else {
-            //         console.error("Invalid order ID:", currentOrder.id);
-            //     }
-            //   }
-    
-    
             clearInterval(this.pollingInterval);
             const newUrl = window.location.origin + window.location.pathname;
             window.history.replaceState({}, document.title, newUrl);
