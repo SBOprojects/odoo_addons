@@ -1,3 +1,4 @@
+import base64
 import datetime
 from datetime import timezone
 import json
@@ -403,125 +404,201 @@ class ApiAuth(models.Model):
         # Get the last update date from the config
         last_update_date_str = config.get_param('bnayax_api.items_last_update', default=False)
 
-        # if not last_update_date_str:
+        if not last_update_date_str:
             # First time fetching items
-        self._fetch_and_process_items(f"{base_url}", headers, is_modifier=False)
+            self._fetch_and_process_items(f"{base_url}", headers, is_modifier=False)
             # Set the last update time
-            # now = datetime.datetime.now(timezone.utc)
-            # config.set_param('bnayax_api.items_last_update', now.strftime("%Y-%m-%dT%H:%M:%S%z"))
-            # print("First time items update finished")
-        # else:
-        #     # Fetch updated items incrementally by day
-        #     last_update_date = datetime.datetime.strptime(last_update_date_str, "%Y-%m-%dT%H:%M:%S%z")
-        #     now = datetime.datetime.now(timezone.utc)
-        #     current_date = last_update_date.date()
-        #     while current_date <= now.date():
-        #         # Construct a datetime object for the start of the current day
-        #         update_date = datetime.datetime.combine(current_date, datetime.time.min).replace(tzinfo=timezone.utc)
-        #         update_date_str = update_date.strftime("%Y-%m-%d") + 'T00%3A00%3A00%2B03%3A00'    
-        #         print(f"Fetching items updated on: {update_date_str}")
-        #         self._fetch_and_process_items(f"{base_url}?updateDate={update_date_str}", headers, is_modifier=False)
-        #         current_date += datetime.timedelta(days=1)
+            now = datetime.datetime.now(timezone.utc)
+            config.set_param('bnayax_api.items_last_update', now.strftime("%Y-%m-%dT%H:%M:%S%z"))
+            print("First time items update finished")
+        else:
+            # Fetch updated items incrementally by day
+            last_update_date = datetime.datetime.strptime(last_update_date_str, "%Y-%m-%dT%H:%M:%S%z")
+            now = datetime.datetime.now(timezone.utc)
+            current_date = last_update_date.date()
+            while current_date <= now.date():
+                # Construct a datetime object for the start of the current day
+                update_date = datetime.datetime.combine(current_date, datetime.time.min).replace(tzinfo=timezone.utc)
+                update_date_str = update_date.strftime("%Y-%m-%d") + 'T00%3A00%3A00%2B03%3A00'    
+                print(f"Fetching items updated on: {update_date_str}")
+                self._fetch_and_process_items(f"{base_url}?updateDate={update_date_str}", headers, is_modifier=False)
+                current_date += datetime.timedelta(days=1)
             
-        #     # Set the last update time
-        #     config.set_param('bnayax_api.items_last_update', now.strftime("%Y-%m-%dT%H:%M:%S%z"))
-        #     print("Regular items update finished")
+            # Set the last update time
+            config.set_param('bnayax_api.items_last_update', now.strftime("%Y-%m-%dT%H:%M:%S%z"))
+            print("Regular items update finished")
         
         return self.display_notification('Success', 'Complete Export All Items!', 'success')
+#mariel - updated here to check if there is image to call the _store_image_in_attachment method
+    def _fetch_and_process_items(self, api_url, headers, is_modifier):
+        try:
+            # API Request
+            response = requests.post(api_url, headers=headers, timeout=30)
+            response.raise_for_status()
+            response_data = response.json()
+            print(f"API Response for {api_url}: {response_data}")
 
-def _fetch_and_process_items(self, api_url, headers, is_modifier):
-    try:
-        response = requests.post(api_url, headers=headers, timeout=30)
-        response.raise_for_status()
-        response_data = response.json()
-        print(f"API Response for {api_url}: {response_data}")
-        
-        if response_data and response_data.get('data') and response_data.get('data').get('responseList'):
-            for item in response_data.get('data', {}).get('responseList', []):
-                product_name = item.get('shortDisplayName', 'Unnamed Product')
-                sirius_item_id = item.get('id')
-                siriues_item_code = item.get('code')
+            if response_data and response_data.get('data') and response_data.get('data').get('responseList'):
+                for item in response_data['data']['responseList']:
+                    # Extract product details
+                    product_name = item.get('shortDisplayName', 'Unnamed Product')
+                    sirius_item_id = item.get('id')
+                    siriues_item_code = item.get('code')
+                    hierarchy1 = item.get('hierarchy1')
+                    hierarchy2 = item.get('hierarchy2')
+                    hierarchy3 = item.get('hierarchy3')
+                    hierarchy4 = item.get('hierarchy4')
+                    hierarchy5 = item.get('hierarchy5')
 
-                hierarchy1 = item.get('hierarchy1')
-                hierarchy2 = item.get('hierarchy2')
-                hierarchy3 = item.get('hierarchy3')
-                hierarchy4 = item.get('hierarchy4')
-                hierarchy5 = item.get('hierarchy5')
+                    # Check hierarchy condition and create categories
+                    if hierarchy1.get('id') != 6:
+                        pos_category_id, product_category_id = self._create_or_update_categories(
+                            hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5
+                        )
 
-                if hierarchy1.get('id') != 6:
-                    pos_category_id, product_category_id = self._create_or_update_categories(
-                        hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5
-                    )
+                    # Process modifiers
+                    if is_modifier:
+                        self._create_or_update_modifier(item)
+                        
 
-                if is_modifier:
-                    self._create_or_update_modifier(item)
-                else:
-                    prices = item.get('prices', [])
-                    list_price = 0.0
-
-                    if prices:
-                        max_price_item = max(prices, key=lambda p: p.get('price', 0.0))
-                        max_price = max_price_item.get('price', 0.0)
-                        if item.get('isModifier') is True:
-                            list_price = max_price
-                        else:
-                            if max_price > 0.0:
+                    # Handle product pricing
+                    else:
+                        prices = item.get('prices', [])
+                        list_price = 0.0 # Set a default list_price if all price are null or no prices
+ 
+                        if prices:
+                            # Get the maximum price, default to 0 if prices are empty or invalid
+                            max_price_item = max(prices, key=lambda p: p.get('price', 0.0))
+                            max_price = max_price_item.get('price', 0.0)
+ 
+ 
+                            if item.get('isModifier') is True:
                                 list_price = max_price
+ 
+                            # Apply discount only if there is a valid price
+                            else:
+                                if max_price > 0.0:
+                                    list_price =max_price
+                                    # list_price =max_price
 
-                    # Extract image URL if available
+                    # Fetch the first image URL if available
                     image_url = None
                     images = item.get('images')
                     if images and isinstance(images, list) and len(images) > 0:
                         image_url = images[0].get('cdnResourceUrl')
 
+                    # Check if the product already exists
                     existing_product = self.env['product.template'].search(
                         [('sirius_item_id', '=', sirius_item_id)], limit=1
                     )
-
                     isModifier = item.get('isModifier')
 
                     if not existing_product:
+                        # Create a new product
                         product_values = {
                             'name': product_name,
                             'sirius_item_id': sirius_item_id,
+                            'siriues_item_code':siriues_item_code,
+
                             'categ_id': product_category_id,
                             'pos_categ_ids': [(6, 0, [pos_category_id])],
                             'available_in_pos': not isModifier,
+                            'self_order_available': not isModifier,
+
                             'is_modifier': False,
                             'prices': prices,
                             'list_price': list_price,
                             'taxes_id': [(6, 0, [])],  # No taxes applied
                         }
+                        new_product = self.env['product.template'].create(product_values)
+                        print(f"Created product {product_name} with ID {sirius_item_id}")
 
+                        # Attach the image if available
                         if image_url:
-                            product_values['image_url'] = image_url
-
-                        self.env['product.template'].create(product_values)
-                        print(f"Created product {product_name} with ID {sirius_item_id} and image {image_url}")
+                            self._store_image_in_attachment(image_url, new_product.id)
                     else:
+                        # Update the existing product
                         product_values = {
                             'categ_id': product_category_id,
                             'pos_categ_ids': [(6, 0, [pos_category_id])],
                             'available_in_pos': not isModifier,
+                            'self_order_available': not isModifier,
+                            'siriues_item_code':siriues_item_code,
+
                             'is_modifier': False,
                             'prices': prices,
                             'list_price': list_price,
                             'taxes_id': [(6, 0, [])],  # No taxes applied
                         }
-
-                        if image_url:
-                            product_values['image_url'] = image_url
-
                         existing_product.write(product_values)
-                        print(f"Updated product {product_name} with ID {sirius_item_id} and image {image_url}")
+                        print(f"Updated product {product_name} with ID {sirius_item_id}")
 
-    except requests.exceptions.RequestException as e:
-        print(f"API Request Error: {e}")
-        return {"error": str(e)}
-    except Exception as e:
-        print(f"Unexpected Error: {e}")
-        return {"error": str(e)}
+                        # Attach the image if available
+                        if image_url:
+                            self._store_image_in_attachment(image_url, existing_product.id)
+        except requests.exceptions.RequestException as e:
+            print(f"API Request Error: {e}")
+            return {"error": str(e)}
+        except Exception as e:
+            print(f"Unexpected Error: {e}")
+            return {"error": str(e)}
+            # mariel : added the new method to store image in attachment
+    def _store_image_in_attachment(self, image_url, product_id):
+        """
+        Helper method to store or update an image from a URL as attachments with different resolutions.
+        """
+        try:
+            if not image_url:
+                print("No image URL provided.")
+                return
 
+            # Download the image
+            image_response = requests.get(image_url, timeout=10)
+            image_response.raise_for_status()
+            image_data = base64.b64encode(image_response.content)
+
+            # Ensure image data exists
+            if not image_data:
+                print("No image data retrieved from the URL.")
+                return
+
+            # Define the resolutions and their corresponding names
+            resolutions = ['image_1920', 'image_1024', 'image_512', 'image_256', 'image_128']
+
+            for resolution in resolutions:
+                # Check if the attachment already exists
+                existing_attachment = self.env['ir.attachment'].search([
+                    ('res_model', '=', 'product.template'),
+                    ('res_id', '=', product_id),
+                    ('res_field', '=', resolution),
+                ], limit=1)
+
+                if existing_attachment:
+                    # Update the existing attachment
+                    existing_attachment.write({
+                        'datas': image_data,
+                        'mimetype': 'image/png',  # Adjust if the format is different
+                    })
+                    print(f"Updated image in ir.attachment for product ID {product_id} with resolution {resolution}")
+                else:
+                    # Create a new attachment if not found
+                    self.env['ir.attachment'].create({
+                        'name': resolution,
+                        'type': 'binary',
+                        'datas': image_data,
+                        'res_model': 'product.template',
+                        'res_id': product_id,
+                        'res_field': resolution,  # Field matches the resolution name
+                        'mimetype': 'image/png',  # Adjust if the format is different
+                    })
+                    print(f"Image stored in ir.attachment for product ID {product_id} with resolution {resolution}")
+
+        except requests.exceptions.RequestException as e:
+            print(f"Error downloading image: {e}")
+        except TypeError as e:
+            print(f"TypeError: {e} - Check if all objects are iterable.")
+        except Exception as e:
+            print(f"Unexpected error while storing image: {e}")
 
     def _create_or_update_categories(self, hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5):
         """Creates or updates product and POS categories based on the Nayax hierarchy."""
@@ -666,8 +743,9 @@ def _fetch_and_process_items(self, api_url, headers, is_modifier):
         product = self.env['product.template'].search([('sirius_item_id', '=', sirius_item_id)], limit=1)
         print('*****************************************************')
 
-        print(sirius_item_id)    
-
+        print(sirius_item_id)
+        
+        attribute_value_ids = [] # Initialize a list to store all attribute value ids for this group
         for item_modifier in modifier_group_data.get('itemModifiers', []):
             modifier_name = item_modifier.get('itemName')
             sirius_item_id_line = item_modifier.get('itemId')
@@ -680,37 +758,41 @@ def _fetch_and_process_items(self, api_url, headers, is_modifier):
             existing_value = self.env['product.attribute.value'].search([
                 ('attribute_id', '=', attribute.id),
                 ('name', '=', modifier_name),
-                ('default_extra_price', '=', line_product.list_price),
+                 ('default_extra_price', '=', line_product.list_price),
                 ('sirius_item_id', '=', sirius_item_id_line)
             ], limit=1)
 
             if not existing_value:
-                self.env['product.attribute.value'].create({
+                new_value = self.env['product.attribute.value'].create({
                     'attribute_id': attribute.id,
                     'name': modifier_name,
                     'default_extra_price': line_product.list_price,
                     'sirius_item_id': sirius_item_id_line
                 })
+                attribute_value_ids.append(new_value.id)  #Add new attribute value id to the list
                 print(f"Created new modifier attribute value: {modifier_name} for group: {group_name}")
             else:
+                attribute_value_ids.append(existing_value.id) # Add existing attribute value id to the list
                 print(f"Modifier attribute value: {modifier_name} for group: {group_name} already exists.")
 
-            if product:
-                    # Check if the attribute line already exists
-                  existing_line = self.env['product.template.attribute.line'].search([
-                     ('product_tmpl_id', '=', product.id),
-                     ('attribute_id', '=', attribute.id)
+        if product:
+              # Check if the attribute line already exists
+                existing_line = self.env['product.template.attribute.line'].search([
+                    ('product_tmpl_id', '=', product.id),
+                    ('attribute_id', '=', attribute.id)
                     ], limit=1)
-                  print (existing_line)
-                  if not existing_line:
-                       self.env['product.template.attribute.line'].create({
-                        'product_tmpl_id': product.id,
-                        'attribute_id': attribute.id,
-                        'value_ids': [(6, 0, attribute.value_ids.ids)], # Add all available values of this attribute
-                       })
-                       print(f"Added attribute {group_name} to product: {product.name}")
-                  else:
-                        print(f"Attribute {group_name} already exists for product: {product.name}")
+                
+                if not existing_line:
+                   self.env['product.template.attribute.line'].create({
+                    'product_tmpl_id': product.id,
+                    'attribute_id': attribute.id,
+                    'value_ids': [(6, 0, attribute_value_ids)], # Add all available values of this attribute
+                    })
+                   print(f"Added attribute {group_name} to product: {product.name}")
+                else:
+                    # Update existing line's value_ids to include all available values
+                    existing_line.write({'value_ids': [(6, 0, attribute_value_ids)]})
+                    print(f"Attribute {group_name} already exists for product: {product.name}. Updated values")
 
     def export_all_modifiers(self):
         """
@@ -735,4 +817,3 @@ def _fetch_and_process_items(self, api_url, headers, is_modifier):
         print("Scheduled job: starting export all items.")
         self.export_all_items()
         print("Scheduled job: finished export all items.")
-        

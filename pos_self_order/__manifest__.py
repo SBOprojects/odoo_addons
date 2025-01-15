@@ -30,8 +30,8 @@
         ],
         'web.assets_backend': [
             "pos_self_order/static/src/upgrade_selection_field.js",
-                        # kad_shahd
-             'pos_self_order/static/src/app/components/order_widget/overwritecss.scss'
+            # kad_shahd
+            'pos_self_order/static/src/app/components/order_widget/overwritecss.scss'
         ],
         "pos_self_order.assets": [
             "pos_self_order/static/src/app/primary_variables.scss",

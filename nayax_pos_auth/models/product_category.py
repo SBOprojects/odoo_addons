@@ -3,7 +3,7 @@ from odoo import models, fields
 class ProductCategory(models.Model):
     _inherit = 'product.category'
 
-    nayax_category_code = fields.Char(string='Nayax Category Code', required=True)
+    nayax_category_code = fields.Char(string='Nayax Category Code' , required=True , default='N/A')
     
     def _create_or_update_categories(self, categories_data):
         for data in categories_data:
@@ -16,7 +16,7 @@ class ProductCategory(models.Model):
 class PosCategory(models.Model):
     _inherit = 'pos.category'
 
-    nayax_category_code = fields.Char(string='Nayax Category Code', required=True)
+    nayax_category_code = fields.Char(string='Nayax Category Code' , required=True , default='N/A'  )
     
     def _create_or_update_categories(self, categories_data):
         for data in categories_data:
@@ -26,14 +26,17 @@ class PosCategory(models.Model):
             else:
                 self.create(data)
 
-class ProductAttributeValue(models.Model):
+
+class PosCategory(models.Model):
     _inherit = 'product.attribute.value'
 
     sirius_item_id = fields.Integer("API Item ID", readonly=True)
-    sirius_group_id = fields.Integer("API Group ID", readonly=True)
+    
 
-class ProductAttribute(models.Model):
+    
+
+class PosCategory(models.Model):
     _inherit = 'product.attribute'
 
-    sirius_item_id = fields.Integer("API Item ID", readonly=True)
-    sirius_group_id = fields.Integer("API Group ID", readonly=True)
+    sirius_group_id = fields.Integer("API Item ID", readonly=True)
+    

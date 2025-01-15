@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Inherit the pos.order form view -->
+        <record id="view_pos_pos_form_inherit" model="ir.ui.view">
+            <field name="name">pos.order.form.inherit</field>
+            <field name="model">pos.order</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+            <field name="arch" type="xml">
+                <!-- Add new field within the group -->
+                <xpath expr="//group[@name='order_fields']" position="inside">
+                     <field name="order_draft_id" widget="char" string="Sirius Order Draft ID" readonly="1"/>
+                    <field name="order_draft_id" widget="boolean_toggle"
+                           options="{'sent_icon': 'fa fa-check-circle text-success', 'not_sent_icon': 'fa fa-times-circle text-danger', 'invisible_if_false': true}"
+                            invisible="order_draft_id == 0" readonly="1" string="Sent To Sirius "/>
+                   <field name="order_draft_id" widget="boolean_toggle"
+                           options="{'sent_icon': 'fa fa-check-circle text-success', 'not_sent_icon': 'fa fa-times-circle text-danger', 'invisible_if_true': true}"
+                           invisible="order_draft_id != 0" readonly="1" string="Sent To Sirius "/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

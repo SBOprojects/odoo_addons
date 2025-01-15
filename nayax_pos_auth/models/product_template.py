@@ -13,18 +13,29 @@ class ProductTemplate(models.Model):
     prices = fields.Char("Prices")
     list_price = fields.Float(digits=(12, 6)) # This change will tell the system to expect more decimals.
 
-
+    siriues_item_code = fields.Char("Sirius Item Code")
+    
     @api.model_create_multi
     def create(self, vals_list):
+        # Search for the latest auth record
+        secret_key = generate_key()  # Generate the key for decryption
 
         config = self.env['ir.config_parameter'].sudo()
-        token = get_token(config)
+        #self.env['api.auth'].search([], order="id desc", limit=1)
+        encrypted_access_token = config.get_param('external_access_token')
+        if not encrypted_access_token:
+        # Raise UserError with message instead of display_notification
+            raise UserError(
+                _('Authentication Token Missing\nPlease log in to the Sirius Model first.')
+            )
+        access_token = decrypt_data(encrypted_access_token, secret_key)
+        # print(f"Decrypted access token: {access_token}")
 
 
         templates = super(ProductTemplate, self).create(vals_list)
         for template in templates:
-            if self.add_new_item(template):
-                template.sent_to_api = True 
+            # if self.add_new_item(template):
+            #     template.sent_to_api = True 
             print('*****************')
 
         return templates
@@ -32,9 +43,16 @@ class ProductTemplate(models.Model):
 
 
     def write(self, vals):
+        secret_key = generate_key()  # Generate the key for decryption
 
         config = self.env['ir.config_parameter'].sudo()
-        token = get_token(config)
+        encrypted_access_token = config.get_param('external_access_token')
+        if not encrypted_access_token:
+            raise UserError(
+                _('Authentication Token Missing\nPlease log in to the Sirius Model first.')
+            )
+        access_token = decrypt_data(encrypted_access_token, secret_key)
+        # print(f"Decrypted access token: {access_token}")
         
         res = super(ProductTemplate, self).write(vals)
         for template in self:

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="pos_session_action_close_session_button" model="ir.ui.view">
+            <field name="name">pos.session.form.close_button</field>
+            <field name="model">pos.session</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@class='oe_button_box']" position="inside">
+                    <button class="oe_stat_button"
+                            type="object"
+                            name="action_pos_session_close"
+                            groups="point_of_sale.group_pos_manager"
+                            invisible="state != 'opened'"
+                            string="Custom Close"
+                            context="{'custom_close': True}"
+                            data-hotkey="q"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

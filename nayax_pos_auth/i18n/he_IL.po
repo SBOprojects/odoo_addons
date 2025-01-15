@@ -1,0 +1,239 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* nayax_pos_auth
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0+e-20241105\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-12 14:26+0000\n"
+"PO-Revision-Date: 2025-01-12 14:26+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: nayax_pos_auth
+#: model:ir.model,name:nayax_pos_auth.model_api_auth
+msgid "API Authentication"
+msgstr "אימות API"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_attribute__sirius_group_id
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_attribute_value__sirius_item_id
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_product__sirius_item_id
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_template__sirius_item_id
+msgid "API Item ID"
+msgstr "מזהה פריט API"
+
+#. module: nayax_pos_auth
+#: model:ir.model,name:nayax_pos_auth.model_product_attribute_value
+msgid "Attribute Value"
+msgstr "ערך תכונה"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_api_auth__auth_status
+msgid "Auth Status"
+msgstr "מצב אימות"
+
+#. module: nayax_pos_auth
+#. odoo-python
+#: code:addons/nayax_pos_auth/models/pos_order.py:0
+#: code:addons/nayax_pos_auth/models/product_template.py:0
+msgid ""
+"Authentication Token Missing\n"
+"Please log in to the Sirius Model first."
+msgstr "חסר אסימון אימות\nאנא התחבר למודל Sirius תחילה."
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_api_auth__create_uid
+msgid "Created by"
+msgstr "נוצר על ידי"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_api_auth__create_date
+msgid "Created on"
+msgstr "נוצר בתאריך"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_api_auth__display_name
+msgid "Display Name"
+msgstr "שם תצוגה"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_pos_order__order_draft_id
+msgid "Draft Order ID"
+msgstr "מזהה טיוטת הזמנה"
+
+#. module: nayax_pos_auth
+#: model_terms:ir.ui.view,arch_db:nayax_pos_auth.view_api_auth_form
+msgid "Enter Login"
+msgstr "הזן שם משתמש"
+
+#. module: nayax_pos_auth
+#: model_terms:ir.ui.view,arch_db:nayax_pos_auth.view_api_auth_form
+msgid "Enter Password"
+msgstr "הזן סיסמה"
+
+#. module: nayax_pos_auth
+#: model_terms:ir.ui.view,arch_db:nayax_pos_auth.view_api_auth_form
+msgid "Export Items From Sirius"
+msgstr "ייצוא פריטים מ-Sirius"
+
+#. module: nayax_pos_auth
+#: model_terms:ir.ui.view,arch_db:nayax_pos_auth.view_api_auth_form
+msgid "Export Items To Sirius"
+msgstr "ייצוא פריטים ל-Sirius"
+
+#. module: nayax_pos_auth
+#: model_terms:ir.ui.view,arch_db:nayax_pos_auth.view_api_auth_form
+msgid "Export Modifiers From Sirius"
+msgstr "ייצוא מודיפיירים מ-Sirius"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_api_auth__id
+msgid "ID"
+msgstr "מזהה"
+
+#. module: nayax_pos_auth
+#: model_terms:ir.ui.view,arch_db:nayax_pos_auth.view_api_auth_form
+msgid "Import Transactions From Sirius"
+msgstr "ייבוא עסקאות מ-Sirius"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_product__is_modifier
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_template__is_modifier
+msgid "Is Modifier"
+msgstr "האם מודיפייר"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_api_auth__write_uid
+msgid "Last Updated by"
+msgstr "עודכן לאחרונה על ידי"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_api_auth__write_date
+msgid "Last Updated on"
+msgstr "עודכן לאחרונה בתאריך"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_api_auth__login
+#: model_terms:ir.ui.view,arch_db:nayax_pos_auth.view_api_auth_form
+msgid "Login"
+msgstr "שם משתמש"
+
+#. module: nayax_pos_auth
+#. odoo-python
+#: code:addons/nayax_pos_auth/crypto_utils.py:0
+msgid "Login Required: Access token is missing. Please log in to proceed."
+msgstr "נדרשת התחברות: אסימון גישה חסר. אנא התחבר כדי להמשיך."
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_pos_category__nayax_category_code
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_category__nayax_category_code
+msgid "Nayax Category Code"
+msgstr "קוד קטגוריה של Nayax"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_api_auth__password
+msgid "Password"
+msgstr "סיסמה"
+
+#. module: nayax_pos_auth
+#: model:ir.model,name:nayax_pos_auth.model_pos_category
+msgid "Point of Sale Category"
+msgstr "קטגוריה של קופה"
+
+#. module: nayax_pos_auth
+#: model:ir.model,name:nayax_pos_auth.model_pos_order
+msgid "Point of Sale Orders"
+msgstr "הזמנות קופה"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,help:nayax_pos_auth.field_product_product__list_price
+#: model:ir.model.fields,help:nayax_pos_auth.field_product_template__list_price
+msgid "Price at which the product is sold to customers."
+msgstr "המחיר בו המוצר נמכר ללקוח."
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_product__prices
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_template__prices
+msgid "Prices"
+msgstr "מחירים"
+
+#. module: nayax_pos_auth
+#: model:ir.actions.server,name:nayax_pos_auth.ir_cron_print_statement_ir_actions_server
+msgid "Print Statement Every Minute"
+msgstr "הדפס הצהרה כל דקה"
+
+#. module: nayax_pos_auth
+#: model:ir.model,name:nayax_pos_auth.model_product_template
+msgid "Product"
+msgstr "מוצר"
+
+#. module: nayax_pos_auth
+#: model:ir.model,name:nayax_pos_auth.model_product_attribute
+msgid "Product Attribute"
+msgstr "תכונת מוצר"
+
+#. module: nayax_pos_auth
+#: model:ir.model,name:nayax_pos_auth.model_product_category
+msgid "Product Category"
+msgstr "קטגורית מוצר"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_api_auth__refresh_token
+msgid "Refresh Token"
+msgstr "אסימון רענון"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_product__list_price
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_template__list_price
+msgid "Sales Price"
+msgstr "מחיר מכירה"
+
+#. module: nayax_pos_auth
+#: model_terms:ir.ui.view,arch_db:nayax_pos_auth.view_pos_pos_form_inherit
+msgid "Sent To Sirius"
+msgstr "נשלח ל-Sirius"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_product__sent_to_api
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_template__sent_to_api
+msgid "Sent to API"
+msgstr "נשלח ל-API"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_api_auth__session_id
+msgid "Session"
+msgstr "סשן"
+
+#. module: nayax_pos_auth
+#: model:ir.actions.act_window,name:nayax_pos_auth.action_api_auth
+#: model:ir.ui.menu,name:nayax_pos_auth.menu_api_auth
+#: model_terms:ir.ui.view,arch_db:nayax_pos_auth.view_api_auth_form
+msgid "Sirius"
+msgstr "Sirius"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_product__siriues_item_code
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_product_template__siriues_item_code
+msgid "Sirius Item Code"
+msgstr "קוד פריט Sirius"
+
+#. module: nayax_pos_auth
+#: model_terms:ir.ui.view,arch_db:nayax_pos_auth.view_pos_pos_form_inherit
+msgid "Sirius Order Draft ID"
+msgstr "מזהה טיוטת הזמנה ב-Sirius"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_api_auth__token
+msgid "Token"
+msgstr "אסימון"
+
+#. module: nayax_pos_auth
+#: model:ir.model.fields,field_description:nayax_pos_auth.field_pos_order__sent_to_sirius
+msgid "sent_to_sirius"
+msgstr "נשלח ל-Sirius"

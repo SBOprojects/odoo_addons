@@ -16,50 +16,120 @@
         flex-direction: inherit;
     }
 }
-
-.payment-confirmation-banner {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: #4CAF50;
-    /* Green background for success */
-    color: white;
-    text-align: center;
-    padding: 10px 0;
-    z-index: 101;
-    /* Ensure it's on top */
-    font-weight: bold;
-    animation: slideDown 0.3s ease-out;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    .close-banner-btn {
+    .confirmation-content {
+         animation: fadeIn 0.5s;
         position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: white;
-        font-size: 1.5em;
-        cursor: pointer;
-        padding: 0;
-        line-height: 1;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8); /* Slightly more opaque background */
+        backdrop-filter: blur(10px); /* Stronger blur effect */
+        padding: 30px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1002; /* Ensure it is above other content */
+         font-family: 'Roboto', sans-serif;
 
-        &:hover {
-            color: #ddd;
+        .confirmation-icon {
+            font-size: 5em;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-family: 'Arial', sans-serif;
+            font-size: 2.2em;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600; /* Bold font weight */
+         }
+
+        .confirmation-message {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.6;
+         }
+
+         .confirmation-details {
+                font-size: 1.1em;
+                color: #333;
+                margin-bottom: 20px;
+                text-align: center; /* Center the text */
+        }
+
+         .order-card {
+            background-color: white;
+            margin: 20px auto;
+            padding: 20px;
+            width: fit-content; /* Adjust width as needed */
+            text-align: center;
+        }
+         .order-number-title {
+            font-size: 1.2em; /* Adjust size as needed */
+             color: #555;
+            margin-bottom: 5px;
+             font-weight: 600; /* Bold font weight */
+         }
+
+        .order-number {
+             font-size: 3em; /* Adjust size as needed */
+             font-weight: 700;
+             color: #333;
+            margin-bottom: 10px;
+             line-height: 1;
+        }
+         .order-total {
+             display: flex;
+             justify-content: center;
+             align-items: center;
+             gap: 5px;
+             font-size: 1.2em;
+            color: #444;
+            margin-top: 15px;
+        }
+
+        .order-total-value {
+             font-weight: 700;
+             color: #333;
+        }
+
+
+        p {
+            text-align: center; /* Center the text in paragraphs */
+           }
+
+        .btn-secondary {
+            background-color: #FFCA00 !important;
+            border-color: #FFCA00 !important;
+            color: black !important;
+            margin-top: auto; /* Push the button to the bottom */
+            margin-bottom: 10px; /* Less bottom margin */
+            padding: 15px 20px; /* More height */
+            font-size: 1.2em;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+            width: 100%; /* Full width */
+
+            &:hover {
+            background-color: #e6b800 !important;
+            border-color: #e6b800 !important;
+            }
         }
     }
-}
 
-@keyframes slideDown {
+
+@keyframes fadeIn {
     from {
-        transform: translateY(-100%);
+        opacity: 0;
     }
 
     to {
-        transform: translateY(0);
+        opacity: 1;
     }
 }

@@ -72,6 +72,7 @@ export class ConfirmationPage extends Component {
 
         onWillStart(() => {
             this.initOrder();
+            console.log(this.confirmedOrder);
         });
     }
 
@@ -81,9 +82,9 @@ export class ConfirmationPage extends Component {
         const formData = new FormData(form);
         const params = new URLSearchParams(formData);
         const url = form.action + "?" + params.toString();
-        window.location.href = url;
+         window.location.href = url;
         this.state.isNayaxPaymentInitiated = true;
-        this.startPolling();
+       this.startPolling();
     }
 
     async generateSignature(companyNum, order, merchantHashKey) {
@@ -96,35 +97,35 @@ export class ConfirmationPage extends Component {
 
     async checkPaymentStatus(orderId) {
         if (!this.state.isNayaxPaymentInitiated) {
-            return;
+         return;
         }
         try {
             const data = await rpc('/pos-self-order/get_payment_status', {
                 order_id: orderId,
             });
 
-            if (data && data.data && data.data.length > 0) {
-                const successfulTransactions = data.data.filter(trans => trans.replyCode === "000");
-                if (successfulTransactions.length > 0) {
-                    this.state.paymentSuccess = true;
-                    this.markOrderAsPaidAndCreateNew();
-                    this.stopPolling();
-                } else {
+          if (data && data.data && data.data.length > 0) {
+              const successfulTransactions = data.data.filter(trans => trans.replyCode === "000");
+             if(successfulTransactions.length > 0) {
+                 this.state.paymentSuccess = true;
+                  this.markOrderAsPaidAndCreateNew();
+                  this.stopPolling();
+              } else {
                     this.state.paymentFailed = true;
                     this.state.paymentError = "Payment was not successful. Please try again.";
                     this.stopPolling();
                     console.log("Payment failed");
                 }
-            } else {
+            }else {
                 this.state.paymentFailed = true;
                 this.state.paymentError = "Payment was not successful. Please try again.";
                 this.stopPolling();
                 console.log("Payment failed");
             }
         } catch (error) {
-            console.error('Error fetching payment status:', error);
-            this.state.paymentFailed = true;
-            this.state.paymentError = "Error checking payment status.";
+           console.error('Error fetching payment status:', error);
+           this.state.paymentFailed = true;
+           this.state.paymentError = "Error checking payment status.";
             this.stopPolling();
         }
     }
@@ -144,11 +145,11 @@ export class ConfirmationPage extends Component {
     }
 
     async markOrderAsPaidAndCreateNew() {
-        try {
-            await this.selfOrder.createNewOrder();
-        }
-        catch (error) {
-            console.error("Error marking the order as paid and creating a new one", error);
+       try {
+           await this.selfOrder.createNewOrder();
+       }
+       catch (error) {
+           console.error("Error marking the order as paid and creating a new one", error);
         }
     }
     async initOrder() {
@@ -222,7 +223,7 @@ export class ConfirmationPage extends Component {
         return this.state.onReload;
     }
 
-    async generateHash() {
+   async generateHash() {
         const amount = this.selfOrder.currentOrder.amount_total || 0;
         const id = this.selfOrder.currentOrder.id || 0;
         console.log(amount);

@@ -1,0 +1,27 @@
+<odoo>
+    <record id="view_pos_hierachy_form" model="ir.ui.view">
+        <field name="name">pos.hierachy.form</field>
+        <field name="model">pos.hierachy</field>
+        <field name="arch" type="xml">
+            <form string="POS Hierarchy">
+                <sheet>
+                    <group>
+                        <field name="custom_id" />  <!-- Updated to use custom_id -->
+                        <field name="code" />
+                        <field name="displayName" />
+                        <field name="printName" />
+                        <field name="images" widget="image" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_pos_hierachy" model="ir.actions.act_window">
+        <field name="name">POS Hierarchy</field>
+        <field name="res_model">pos.hierachy</field>
+        <field name="view_mode">form</field>
+    </record>
+
+    <menuitem id="menu_pos_hierachy" name="Manage POS Hierarchy" parent="menu_api_auth" action="action_pos_hierachy" sequence="10"/>
+</odoo>

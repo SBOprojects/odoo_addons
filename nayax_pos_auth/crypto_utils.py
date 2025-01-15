@@ -44,6 +44,7 @@ def get_token(config):
             _('Login Required: Access token is missing. Please log in to proceed.')
         )    
     access_token = decrypt_data(encrypted_access_token, secret_key)
+    print(f"Decrypted access token: {access_token}")
     return access_token
 
 

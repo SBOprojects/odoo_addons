@@ -361,7 +361,7 @@ export class SelfOrder extends Reactive {
                 screenMode = payAfter === "meal" ? "order" : "pay";
             }
 
-            //this.confirmationPage(screenMode, device, order.access_token);
+            // this.confirmationPage(screenMode, device, order.access_token);
         } else {
             // In meal mode, first time the customer validate his order, we send it to the server
             // and we redirect him to the confirmation page, the next time he validate his order
@@ -433,15 +433,15 @@ export class SelfOrder extends Reactive {
             (p) => p.pos_categ_ids.length === 0 && !isSpecialProduct(p)
         );
 
+        // shahd_kad
         if (productWoCat.length) {
-            // shahd
             // this.productCategories.push({
             //     id: 0,
             //     hour_after: 0,
             //     hour_until: 24,
             //     name: _t("Uncategorised"),
             // });
-            // this.productByCategIds["0"] = productWoCat;
+            this.productByCategIds["0"] = productWoCat;
         }
 
         this.currentLanguage = this.config.self_ordering_available_language_ids.find(
@@ -604,15 +604,15 @@ export class SelfOrder extends Reactive {
                         customer_note: changes["customer_note"],
                         attribute_value_ids: changes["attribute_value_ids"]
                             ? JSON.parse(changes["attribute_value_ids"]).map((a) => [
-                                "link",
-                                this.models["product.template.attribute.value"].get(a),
-                            ])
+                                  "link",
+                                  this.models["product.template.attribute.value"].get(a),
+                              ])
                             : [],
                         custom_attribute_value_ids: changes["custom_attribute_value_ids"]
                             ? JSON.parse(changes["custom_attribute_value_ids"]).map((a) => [
-                                "link",
-                                this.models["product.attribute.custom.value"].get(a),
-                            ])
+                                  "link",
+                                  this.models["product.attribute.custom.value"].get(a),
+                              ])
                             : [],
                     });
                 }
@@ -805,6 +805,12 @@ export class SelfOrder extends Reactive {
     }
 
     getProductDisplayPrice(product) {
+        // getProductDisplayPrice(product) {
+        //     const pricelist = this.config.pricelist_id;
+        //     const price = product.get_price(pricelist, 1);
+    
+        //     return price;
+        // }
         const pricelist = this.config.pricelist_id;
         const price = product.get_price(pricelist, 1);
 
@@ -832,10 +838,11 @@ export class SelfOrder extends Reactive {
         } else {
             return taxesData.total_excluded;
         }
-
     }
+
+
     getLinePrice(line) {
-        return this.config.iface_tax_included ? line.price_subtotal_incl : line.price_subtotal;
+        return this.config.iface_tax_included ? line.price_subtotal_inclK : line.price_subtotal;
     }
     getSelectedAttributes(line) {
         const attributeValues = line.attribute_value_ids;

@@ -1,3 +1,4 @@
+
 from datetime import datetime
 import json
 import threading
@@ -8,83 +9,73 @@ from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import _
 from odoo.addons.nayax_pos_auth.crypto_utils import decrypt_data, encrypt_data, generate_key, get_token, handle_request_with_relogin
-import logging
-
-_logger = logging.getLogger(__name__)
-
+# 
 
 class PosOrder(models.Model):
     _inherit = "pos.order"
-    order_draft_id = fields.Integer(string='Draft Order ID', default=0)
-    _processed_orders = set()
-    sync_status = fields.Selection(
-        [
-            ('pending', 'Pending Sync'),
-            ('synced', 'Synced'),
-            ('failed', 'Sync Failed'),
-        ],
-        string='Sync Status',
-        default='pending',
-        readonly=True,
-        help='Indicates the sync status of the transaction with Nayax.',
-    )
+    order_draft_id = fields.Integer(string='Draft Order ID')
+    order_draft_code= fields.Integer(string='Draft Order code')
 
+    sent_to_sirius = fields.Boolean(string='sent_to_sirius', default=False)
+    _processed_orders = set()
+    
     @api.model_create_multi
     def create(self, vals_list):
-         print('999999999999999999999999999999999999')
-         secret_key = generate_key()  # Generate the key for decryption
+        print('999999999999999999999999999999999999')
+        secret_key = generate_key()  # Generate the key for decryption
 
-         config = self.env['ir.config_parameter'].sudo()
-         encrypted_access_token = config.get_param('external_access_token')
-         if not encrypted_access_token:
-             raise UserError(
-                 _('Authentication Token Missing\nPlease log in to the Sirius Model first.')
-             )
-         access_token = decrypt_data(encrypted_access_token, secret_key)
-         
-         # Ensure sync_status is set to 'pending' during creation
-         for vals in vals_list:
-             vals['sync_status'] = 'pending'
-        
-         orders = super().create(vals_list)
-         return orders
+        config = self.env['ir.config_parameter'].sudo()
+        #self.env['api.auth'].search([], order="id desc", limit=1)
+        encrypted_access_token = config.get_param('external_access_token')
+        if not encrypted_access_token:
+        # Raise UserError with message instead of display_notification
+            raise UserError(
+                _('Authentication Token Missing\nPlease log in to the Sirius Model first.')
+            )
+        access_token = decrypt_data(encrypted_access_token, secret_key)
+        orders = super().create(vals_list)
+        # Call the add_order method for each created order
+        # for order in orders:
+        #       order.add_order(order)        
+        return orders
+    
 
-    @api.model
-    def _process_order(self, order, existing_order):
-         """Override the method to add a print statement and call the super method."""
-         # Add your custom print statement
-         print('***********************************************************************')
-         result = super(PosOrder, self)._process_order(order, existing_order)
-         if existing_order:
-             
-             print(order)
-             self.update_order_draft(order)
-         return result
+    # @api.model
+    # def _process_order(self, order, existing_order):
+    #     """Override the method to add a print statement and call the super method."""
+    #     # Add your custom print statement
+    #     print('***********************************************************************')
+    #     result = super(PosOrder, self)._process_order(order, existing_order)
+    #     if existing_order:
+            
+    #         print(order)
+    #         # self.update_order_draft(order)
+    #     return result
 
     def write(self, values):
-        """
-        Override the write method to ensure add_order is called only once per order
-        and only after calling the parent write method.
-        """
-        # Debug statement
-        print('55555555555599999999999999999999999999999999 - Write method start')
+            """
+            Override the write method to ensure add_order is called only once per order
+            and only after calling the parent write method.
+            """
+            # Debug statement
+            print('55555555555599999999999999999999999999999999')
 
-        # Call the original write method first
-        result = super(PosOrder, self).write(values)
 
-        # Check conditions and call add_order if needed
-        for order in self:
-            print(f"Order {order.name} state: {order.state}, order_draft_id: {order.order_draft_id}, sync_status: {order.sync_status} - Before add_order check")
-            if order.state == 'paid' and order.order_draft_id == 0 and order.sync_status == 'pending':
-                print(f"Order {order.name} - add_order method is called")
-                order.add_order(order)
-            print(f"Order {order.name} state: {order.state}, order_draft_id: {order.order_draft_id}, sync_status: {order.sync_status} - Write method end")
+            # Call the original write method first
+            result = super(PosOrder, self).write(values)
 
-        # Return the result of the super write method
-        return result
+            # Check conditions and call add_order if needed
+            for order in self:
+                if order.state == 'paid' and order.order_draft_id == 0  and  order.id  not in self._processed_orders:
+                        print(f"###########################################################")
+                        self._processed_orders.add(order.id)
+                        self.add_order(order)
+                        print(f"_processed_orders after write: {self._processed_orders}")
+                        
+            # Return the result of the super write method
+            return result
 
     def add_order(self, order):
-        print('basharbasharbasharbasharbasharbasharbasharbasharbashar - add_order method start')
         api_url = "https://gateway-api-srv.stage.bnayax.com/api/transaction-draft"
         secret_key = generate_key()  # Generate the key for decryption
 
@@ -93,107 +84,94 @@ class PosOrder(models.Model):
 
         # Now we can safely strip the token
         headers = {
-            "Authorization": f"Bearer {token.strip()}",
-            "Cache-Control": "no-cache",
-            "Content-Type": "application/json",
-            "Accept": "application/vnd.transaction-upitec.v1.0+json",
-            "User-Agent": "PostmanRuntime/7.43.0"
+        "Authorization": f"Bearer {token.strip()}",
+        "Cache-Control": "no-cache",
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.transaction-upitec.v1.0+json",
+        "User-Agent": "PostmanRuntime/7.43.0"
 
         }
         payload = self.payelod_data(order)
+        # print(payload)
         
         try:
                 print(f"Debug: Sending request for template ID:")
-                _logger.info(f"Debug: Payload: {json.dumps(payload)}") # Log the payload
-                
-                response = requests.post(api_url, json=payload, headers=headers)
-                is_expired, response_json =   handle_request_with_relogin(api_url,payload, "POST" ,headers,config ,secret_key)
 
+                response = requests.post(api_url, json=payload, headers=headers)
                 response.raise_for_status()  # Raise exception for HTTP errors
                 print(f"Debug: Request sent successfully for template ID ")
-                print(f"Debug: Response: {response_json}")
+                # print(f"Debug: Response: {response.json()}")
 
+                response_data = response.json()
+                print(response_data)
 
-                if response_json.get("status") == "OK":
-                        # Update both the draft ID and the sync status
-                        order.write({
-                            'order_draft_id': response_json.get("data", {}).get("id"),
-                            'sync_status': 'synced'
-                        })
+                if response_data.get("status") == "OK":
+                        order.order_draft_id = response_data.get("data", {}).get("id")
+                        order.sent_to_sirius = True
+                        order.order_draft_code = response_data.get("data", {}).get("code")
                         print(order.order_draft_id)
-                else:
-                        # Update sync status to failed
-                        order.write({'sync_status': 'failed'})
-                        _logger.error(f"API call failed. Response: {response_json}")
-                        
+
+
+# 4387-7511-1111-1111
+
+
         except requests.exceptions.RequestException as e:
-                # Update sync status to failed on exception
-                order.write({'sync_status': 'failed'})
-                _logger.error(f"Failed to send data to the API: {e}")
                 raise UserError(f"Failed to send data to the API: {e}")
-        print('basharbasharbasharbasharbasharbasharbasharbasharbashar - add_order method end')
+
+
+        
+        
 
     def get_order_by_draft_id(self,order):
-         order_draft_id = order.get('order_draft_id')
-         print(order_draft_id)
-         api_url = f"https://gateway-api-srv.stage.bnayax.com/api/transaction-draft/{order_draft_id}"
-         secret_key = generate_key()  # Generate the key for decryption
+        order_draft_id = order.get('order_draft_id')
+        print(order_draft_id)
+        api_url = f"https://gateway-api-srv.stage.bnayax.com/api/transaction-draft/{order_draft_id}"
+        secret_key = generate_key()  # Generate the key for decryption
 
-         config = self.env['ir.config_parameter'].sudo()
-         token = get_token(config)
+        config = self.env['ir.config_parameter'].sudo()
+        token = get_token(config)
 
-         # Now we can safely strip the token
-         headers = {
-         "Authorization": f"Bearer {token.strip()}",
-         }
-         try:
-                 print(f"Debug: Sending GET request for template ID: {order_draft_id}")
-                 is_expired, response_json =   handle_request_with_relogin(api_url,'', "GET" ,headers,config ,secret_key)
-                 print( response_json)
-                 return response_json
-         except requests.exceptions.RequestException as e:
-              _logger.error(f"Failed to fetch item data: {e}")
-              raise UserError(f"Failed to fetch item data: {e}")
+        # Now we can safely strip the token
+        headers = {
+        "Authorization": f"Bearer {token.strip()}",
+        }
+        try:
+                print(f"Debug: Sending GET request for template ID: {order_draft_id}")
+                is_expired, response_json =   handle_request_with_relogin(api_url,'', "GET" ,headers,config ,secret_key)
+                print( response_json)
+                return response_json
+        except requests.exceptions.RequestException as e:
+             raise UserError(f"Failed to fetch item data: {e}")
 
     def update_order_draft(self, order):
-         order_befor_update = self.get_order_by_draft_id(order)
-         order_draft_id = order.get('order_draft_id')
+        order_befor_update = self.get_order_by_draft_id(order)
+        order_draft_id = order.get('order_draft_id')
 
-         api_url = f"https://gateway-api-srv.stage.bnayax.com/api/transaction-draft/{order_draft_id}"
-         secret_key = generate_key()  # Generate the key for decryption
+        api_url = f"https://gateway-api-srv.stage.bnayax.com/api/transaction-draft/{order_draft_id}"
+        secret_key = generate_key()  # Generate the key for decryption
 
-         config = self.env['ir.config_parameter'].sudo()
-         #self.env['api.auth'].search([], order="id desc", limit=1)
-         token = get_token(config)
+        config = self.env['ir.config_parameter'].sudo()
+        #self.env['api.auth'].search([], order="id desc", limit=1)
+        token = get_token(config)
 
-         headers = {
-             "Authorization": f"Bearer {token.strip()}",
-             "Content-Type": "application/json",
-         }   
-         guid = order_befor_update.get('data', {}).get('guid')
-         print(guid)
-         payload =self.payelod_data_update(order,guid)
+        headers = {
+            "Authorization": f"Bearer {token.strip()}",
+            "Content-Type": "application/json",
+        }   
+        guid = order_befor_update.get('data', {}).get('guid')
+        print(guid)
+        payload =self.payelod_data_update(order,guid)
 
-         print(payload)
-         
-         try:
-             print(f"Debug: Sending PUT request for template ID: {order_draft_id}")
-             is_expired, response_json =   handle_request_with_relogin(api_url,payload, "PUT" ,headers,config ,secret_key)
-             print(f"Debug: Response: {response_json}")
+        print(payload)
+        
+        try:
+            print(f"Debug: Sending PUT request for template ID: {order_draft_id}")
+            is_expired, response_json =   handle_request_with_relogin(api_url,payload, "PUT" ,headers,config ,secret_key)
+            print(f"Debug: Response: {response_json}")
 
-         except requests.exceptions.RequestException as e:
-              _logger.error(f"Failed to send data to the API: {e}")
-              raise UserError(f"Failed to send data to the API: {e}")
-
-    def _format_datetime(self, dt_value):
-            """Formats a datetime object to the required string format."""
-            if not dt_value:
-                return None
-            if isinstance(dt_value, str):
-                 dt_value = datetime.strptime(dt_value, "%Y-%m-%d %H:%M:%S.%f")
-            return dt_value.strftime("%Y-%m-%dT%H:%M:%S.") + f'{dt_value.microsecond // 1000:03d}Z'
-
-
+        except requests.exceptions.RequestException as e:
+            raise UserError(f"Failed to send data to the API: {e}")
+  
     def payelod_data(self,order):
         print(order.read()[0]) 
         order_data = order.read()[0]
@@ -217,16 +195,15 @@ class PosOrder(models.Model):
 
         tip_tender_list_amount = order_data['amount_difference'] 
         tip_tender_List_currency_amount= order_data['amount_difference'] 
-        # Generate a unique draft transaction number using order ID and a timestamp
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]  # Use milliseconds for more precision
-        draftTransactionNumber = f"{order_data['id']}-{timestamp}"
+        draftTransactionNumber = f"{3000 + order_data['id']:04d}"
+        print(f'draftTransactionNumber' +draftTransactionNumber)
         transactionRemarks = order_data['name']
 
 
         # Ensure that 'create_date' and 'write_date' are in the correct format
-        draftTransactionDate = self._format_datetime(order_data['create_date'])
-        transactionStartDateTime = self._format_datetime(order_data['write_date'])
-        updateDraftStatusDateTime =  self._format_datetime(order_data['create_date'])
+        draftTransactionDate = order_data['create_date'].strftime('%Y-%m-%d %H:%M:%S.%f') if order_data['create_date'] else None
+        transactionStartDateTime = order_data['write_date'].strftime('%Y-%m-%d %H:%M:%S.%f') if order_data['write_date'] else None
+        updateDraftStatusDateTime = order_data['create_date'].strftime('%Y-%m-%d %H:%M:%S.%f') if order_data['create_date'] else None
 
         items = []
 
@@ -239,41 +216,37 @@ class PosOrder(models.Model):
             product = self.env['product.product'].search([('id', '=', line.product_id.id)], limit=1)
             if product:
                 sirius_item_id = product.sirius_item_id
+                siriues_item_code = product.siriues_item_code
             else:
                 sirius_item_id = None
-            item_code = sirius_item_id  # Assuming 'default_code' as the item code
+            item_code = siriues_item_code  # Assuming 'default_code' as the item code
+            item_id = sirius_item_id
             item_name = line.full_product_name
             line_number = line.id
             item_price = line.price_unit
             item_qty = line.qty
             vat_amount = line.price_subtotal_incl - line.price_subtotal  # VAT amount calculation
 
-            # Modifier extraction logic
             modifiers = []
-            print(f"Processing item1: {line.full_product_name}")
-            if '(' in line.full_product_name and ')' in line.full_product_name:
-                try:
-                    modifier_str = line.full_product_name.split('(', 1)[1].rsplit(')', 1)[0]
-                    modifier_names = [mod.strip() for mod in modifier_str.split(',')]
 
-                    for mod_name in modifier_names:
-                        # Find the modifier in product.template.attribute.value model
-                        modifier_record = self.env['product.template.attribute.value'].search([('name', '=', mod_name)], limit=1)
-                        modifier_price = modifier_record.price_extra if modifier_record else 0.0
-                        print(f"Modifier Product: {mod_name}, Price: {modifier_price}")
-                        modifiers.append({
-                            "itemModifierName": mod_name,
-                            "price": modifier_price,  # Get the price from model
+            for attribute_value in line.attribute_value_ids:
+
+                print("Before Modifier Append - product_attribute_value_id:", attribute_value.product_attribute_value_id)
+                modifiers.append({
+                            "itemModifierName": attribute_value.product_attribute_value_id.name,
+                            "price": attribute_value.price_extra,  # Get the price from model
                             "quantity": 1,
                         })
-                except:
-                    print("Error in modifiers1")
 
-            # Append the formatted item data to the list
+                print(modifiers)
+
+
             items.append({
                 "amount": item_amount,
-                "itemCode": str(item_code) if item_code else "1000",  
+                # TODO: should to change it to  item_code after add items to sirius
+                "itemCode": item_code  ,  
                 "itemName": item_name,
+                "item_id": item_id,
                 "lineNumber": line_number,
                 "price": item_price,
                 "quantity": item_qty,
@@ -283,7 +256,7 @@ class PosOrder(models.Model):
 
 
         # Print the JSON structure
-    
+       
         payload = {
                 "cashierNumber": cashierNumber,
                 "openTransactionEmployeeId": 1,
@@ -320,7 +293,7 @@ class PosOrder(models.Model):
                 },
                 "status": 0,
                 "draftTransactionDate": draftTransactionDate,
-                "draftTransactionNumber": 10009,
+                "draftTransactionNumber": draftTransactionNumber,
                 "transactionRemarks": transactionRemarks,
                 "transactionStartDateTime": transactionStartDateTime,
                 "transactionType": 1,
@@ -352,15 +325,22 @@ class PosOrder(models.Model):
 
         # Ensure that 'create_date' and 'write_date' are properly formatted
 
-        draftTransactionDate = self._format_datetime(order.get('create_date'))
-        transactionStartDateTime = self._format_datetime(order.get('write_date'))
-        
+
         items = []
 
         # Fetch all order lines
         order_lines = self.env['pos.order.line'].search([('order_id', '=', order.get('id'))])
+        draftTransactionDate = order.get('create_date')
+        original_datetime = datetime.strptime(draftTransactionDate, "%Y-%m-%d %H:%M:%S")
+        formatted_datetime = original_datetime.strftime("%Y-%m-%dT%H:%M:%S.") + f'{original_datetime.microsecond // 1000:03d}Z'
 
 
+
+        transactionStartDateTime = order.get('write_date')
+        original_datetime1 = datetime.strptime(transactionStartDateTime, "%Y-%m-%d %H:%M:%S")
+        formatted_datetime2 = original_datetime.strftime("%Y-%m-%dT%H:%M:%S.") + f'{original_datetime1.microsecond // 1000:03d}Z'
+
+        print(transactionStartDateTime)
         # Iterate through each order line and construct the JSON data
         for line in order_lines:
             item_amount = line.price_subtotal_incl
@@ -433,16 +413,16 @@ class PosOrder(models.Model):
                 ]
             },
             "status": 0,
-            "draftTransactionDate": draftTransactionDate,
-            "draftTransactionNumber": draftTransactionNumber,
+            "draftTransactionDate": formatted_datetime,
+            "draftTransactionNumber": 20002,
             "transactionRemarks": transactionRemarks,
-            "transactionStartDateTime": transactionStartDateTime,
+            "transactionStartDateTime": formatted_datetime2,
             "transactionType": 1,
             "draftTransactionStatus": "OPENED",
-            "updateDraftStatusDateTime": transactionStartDateTime,
+            "updateDraftStatusDateTime": formatted_datetime2,
             "extendedData": {
                 "kioskServiceType": "2"
             }
         }
 
-        return payload
+        return payload 
