@@ -1,0 +1,214 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* PCN_model
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0+e-20241105\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-11-11 12:59+0000\n"
+"PO-Revision-Date: 2024-11-11 12:59+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: PCN_model
+#. odoo-python
+#: code:addons/PCN_model/models/account_move_inherit.py:0
+msgid "An error occurred while fetching invoices and credit notes: %s"
+msgstr "אירעה שגיאה בעת שליפת חשבוניות ותעודות זיכוי: %s"
+
+
+#. module: PCN_model
+#: model_terms:ir.ui.view,arch_db:PCN_model.view_invoice_confirmation_wizard_form
+msgid "Cancel"
+msgstr "ביטול"
+
+#. module: PCN_model
+#: model_terms:ir.ui.view,arch_db:PCN_model.view_invoice_report_wizard
+msgid "Choose a format to download the retrieved invoices."
+msgstr "בחר פורמט להורדת החשבוניות שנשלפו."
+
+#. module: PCN_model
+#: model:ir.model,name:PCN_model.model_res_company
+msgid "Companies"
+msgstr "חברות"
+
+#. module: PCN_model
+#: model_terms:ir.ui.view,arch_db:PCN_model.view_invoice_confirmation_wizard_form
+msgid "Confirm"
+msgstr "אישור"
+
+#. module: PCN_model
+#: model_terms:ir.ui.view,arch_db:PCN_model.view_invoice_confirmation_wizard_form
+msgid "Confirm Invoice Download"
+msgstr "אשר הורדת חשבונית"
+
+#. module: PCN_model
+#: model:ir.model,name:PCN_model.model_invoice_confirmation_wizard
+msgid "Confirm or Cancel File Download"
+msgstr "אשר או בטל הורדת קובץ"
+
+
+#. module: PCN_model
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_confirmation_wizard__create_uid
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_report_wizard__create_uid
+msgid "Created by"
+msgstr "נוצר על ידי"
+
+#. module: PCN_model
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_confirmation_wizard__create_date
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_report_wizard__create_date
+msgid "Created on"
+msgstr "נוצר בתאריך"
+
+#. module: PCN_model
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_confirmation_wizard__custom_message
+msgid "Custom Message"
+msgstr "הודעה מותאמת אישית"
+
+#. module: PCN_model
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_confirmation_wizard__display_name
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_report_wizard__display_name
+msgid "Display Name"
+msgstr "שם תצוגה"
+
+#. module: PCN_model
+#: model_terms:ir.ui.view,arch_db:PCN_model.view_invoice_report_wizard
+msgid "Download Custom TXT"
+msgstr "הורד קובץ TXT מותאם אישית"
+
+#. module: PCN_model
+#: model_terms:ir.ui.view,arch_db:PCN_model.view_invoice_report_wizard
+msgid "Download to Excel"
+msgstr "הורד ל-Excel"
+
+#. module: PCN_model
+#: model_terms:ir.ui.view,arch_db:PCN_model.view_invoice_report_wizard
+msgid "Download to JSON"
+msgstr "הורד ל-JSON"
+
+#. module: PCN_model
+#: model_terms:ir.ui.view,arch_db:PCN_model.view_invoice_report_wizard
+msgid "Download to TXT"
+msgstr "הורד ל-TXT"
+
+#. module: PCN_model
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_report_wizard__end_date
+msgid "End Date"
+msgstr "תאריך סיום"
+
+#. module: PCN_model
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_report_wizard__file_data
+msgid "File"
+msgstr "קובץ"
+
+#. module: PCN_model
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_report_wizard__file_name
+msgid "File Name"
+msgstr "שם קובץ"
+
+#. module: PCN_model
+#: model_terms:ir.ui.view,arch_db:PCN_model.view_invoice_report_wizard
+msgid "Get Invoices"
+msgstr "קבל חשבוניות"
+
+#. module: PCN_model
+#: model:ir.actions.act_window,name:PCN_model.action_invoice_report_wizard
+#: model_terms:ir.ui.view,arch_db:PCN_model.view_invoice_report_wizard
+msgid "Get Invoices Between Dates"
+msgstr "קבל חשבוניות בין תאריכים"
+
+#. module: PCN_model
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_confirmation_wizard__id
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_report_wizard__id
+msgid "ID"
+msgstr "מזהה"
+
+#. module: PCN_model
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_confirmation_wizard__invoice_report_id
+msgid "Invoice Report"
+msgstr "דוח חשבוניות"
+
+#. module: PCN_model
+#. odoo-python
+#: code:addons/PCN_model/models/account_move_inherit.py:0
+msgid ""
+"Invoices exceed max amount without VAT ID:\n"
+"\n"
+"%s"
+msgstr "חשבוניות חורגות מהסכום המקסימלי ללא מע\"מ מזהה:\n\n%s"
+
+#. module: PCN_model
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_confirmation_wizard__write_uid
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_report_wizard__write_uid
+msgid "Last Updated by"
+msgstr "עודכן לאחרונה על ידי"
+
+#. module: PCN_model
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_confirmation_wizard__write_date
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_report_wizard__write_date
+msgid "Last Updated on"
+msgstr "עודכן לאחרונה בתאריך"
+
+#. module: PCN_model
+#. odoo-python
+#: code:addons/PCN_model/models/account_move_inherit.py:0
+msgid "No Invoices Found"
+msgstr "לא נמצאו חשבוניות"
+
+#. module: PCN_model
+#. odoo-python
+#: code:addons/PCN_model/models/account_move_inherit.py:0
+msgid "No invoices found to export."
+msgstr "לא נמצאו חשבוניות לייצוא."
+
+#. module: PCN_model
+#. odoo-python
+#: code:addons/PCN_model/models/account_move_inherit.py:0
+msgid "No invoices were found for the selected date range."
+msgstr "לא נמצאו חשבוניות עבור טווח התאריכים שנבחר."
+
+#. module: PCN_model
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_confirmation_wizard__missing_vat_count
+msgid "Number of Invoices without VAT ID"
+msgstr "מספר חשבוניות ללא מזהה מע\"מ"
+
+#. module: PCN_model
+#: model_terms:ir.ui.view,arch_db:PCN_model.view_invoice_confirmation_wizard_form
+msgid "Please review the following information before proceeding."
+msgstr "אנא בדוק את המידע הבא לפני המשך."
+
+#. module: PCN_model
+#: model_terms:ir.ui.view,arch_db:PCN_model.view_invoice_report_wizard
+msgid "Retrieve invoices for the selected date range."
+msgstr "שלוף חשבוניות עבור טווח התאריכים שנבחר."
+
+#. module: PCN_model
+#: model_terms:ir.ui.view,arch_db:PCN_model.view_invoice_report_wizard
+msgid "Select the date range for the invoices you want to retrieve."
+msgstr "בחר את טווח התאריכים עבור החשבוניות שברצונך לשלוף."
+
+#. module: PCN_model
+#: model:ir.model.fields,field_description:PCN_model.field_invoice_report_wizard__start_date
+msgid "Start Date"
+msgstr "תאריך התחלה"
+
+#. module: PCN_model
+#. odoo-python
+#: code:addons/PCN_model/models/account_move_inherit.py:0
+msgid "Start date must be before or equal to end date."
+msgstr "תאריך ההתחלה חייב להיות לפני או שווה לתאריך הסיום."
+
+#. module: PCN_model
+#: model:ir.model,name:PCN_model.model_invoice_report_wizard
+msgid "Wizard to get invoices between two dates"
+msgstr "אשף לשליפת חשבוניות בין שני תאריכים"
+
+#. module: PCN_model
+#: model:ir.ui.menu,name:PCN_model.menu_invoices_between_dates
+msgid "pcn"
+msgstr "מנכ"

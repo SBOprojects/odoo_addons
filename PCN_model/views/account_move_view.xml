@@ -1,0 +1,9 @@
+<odoo>
+    <!-- Main Menu Item -->
+    <menuitem id="menu_invoices_between_dates" 
+              name="pcn" 
+              action="action_invoice_report_wizard" 
+              sequence="10"/>
+
+
+</odoo>
