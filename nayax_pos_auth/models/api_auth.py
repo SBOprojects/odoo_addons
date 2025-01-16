@@ -55,10 +55,10 @@ class ApiAuth(models.Model):
                     company_names = [company.get('name') for company in companies]
 
                     # Print data before encryption
-                    print(f"Access token: {access_token}")
-                    print(f"Refresh token: {refresh_token}")
-                    print(f"Session ID: {session_id}")
-                    print(f"Company names: {company_names}")
+                    _logger.info(f"Access token: {access_token}")
+                    _logger.info(f"Refresh token: {refresh_token}")
+                    _logger.info(f"Session ID: {session_id}")
+                    _logger.info(f"Company names: {company_names}")
 
                     # Encrypt tokens before storing them
                     encrypted_access_token = encrypt_data(access_token, secret_key)
@@ -76,7 +76,7 @@ class ApiAuth(models.Model):
                     config.set_param('external_username', encrypted_username)  # Save encrypted username
                     config.set_param('external_password', encrypted_password)  # Save encrypted password
 
-                    print(self.get_decrypted_tokens())  # Print decrypted tokens to verify
+                    _logger.info(f"Decrypted Tokens: {self.get_decrypted_tokens()}")  # Print decrypted tokens to verify
 
                     return {
                         'type': 'ir.actions.client',
@@ -174,11 +174,18 @@ class ApiAuth(models.Model):
         # self.env['api.auth'].search([], order="id desc", limit=1)
         token = get_token(config)
 
+        exported_product_ids = []
         for product in products:
             if self.export_item(product):
-                product.write({'sent_to_api': True})  # Update the field in the database
+                exported_product_ids.append(product.id)  # Collect exported product IDs
+
+        if exported_product_ids:
+            # Update all exported products at once using write on the records
+            self.env['product.template'].browse(exported_product_ids).write({'sent_to_api': True})
+
         return self.display_notification('Success', 'Complete Export All Products!', 'success')
 
+    @api.model
     def export_item(self, template):
         api_url = "https://gateway-api-srv.stage.bnayax.com/api/item"
         config = self.env['ir.config_parameter'].sudo()
@@ -275,16 +282,16 @@ class ApiAuth(models.Model):
             "validTo": None
         }
 
-        print(f"Debug: Payload for template ID {template.id}: {payload}")
+        _logger.debug(f"Payload for template ID {template.id}: {payload}")
 
         # Send the POST request
         try:
-            print(f"Debug: Sending request for template ID: {template.id}")
+            _logger.debug(f"Sending request for template ID: {template.id}")
 
             response = requests.post(api_url, json=payload, headers=headers)
             response.raise_for_status()  # Raise exception for HTTP errors
-            print(f"Debug: Request sent successfully for template ID {template.id}.")
-            print(f"Debug: Response: {response.json()}")
+            _logger.debug(f"Request sent successfully for template ID {template.id}.")
+            _logger.debug(f"Response: {response.json()}")
 
             response_data = response.json()
 
@@ -294,7 +301,8 @@ class ApiAuth(models.Model):
 
 
         except requests.exceptions.RequestException as e:
-            raise UserError(f"Failed to send data to the API: {e}")
+           _logger.error(f"Failed to send data to the API: {e}")
+           raise UserError(f"Failed to send data to the API: {e}")
 
     def import_transactions(self):
         api_url = "https://gateway-api-srv.stage.bnayax.com/api/transaction-draft-order"
@@ -315,10 +323,10 @@ class ApiAuth(models.Model):
             return {"result": "API call successful", "data": response_data}  # Return something other than false
 
         except requests.exceptions.RequestException as e:
-            print(f"API Request Error: {e}")
+            _logger.error(f"API Request Error: {e}")
             return {"error": str(e)}
         except Exception as e:
-            print(f"Unexpected Error: {e}")
+            _logger.error(f"Unexpected Error: {e}")
             return {"error": str(e)}
 
     def display_notification(self, title, message, notification_type='info'):
@@ -339,7 +347,7 @@ class ApiAuth(models.Model):
         """Helper method to store or update an image from a URL as attachments with different resolutions."""
         try:
             if not image_url:
-                print("No image URL provided.")
+                _logger.warning("No image URL provided.")
                 return
 
             # Download the image
@@ -349,7 +357,7 @@ class ApiAuth(models.Model):
 
             # Ensure image data exists
             if not image_data:
-                print("No image data retrieved from the URL.")
+                _logger.warning("No image data retrieved from the URL.")
                 return
 
             # Define the resolutions and their corresponding names
@@ -369,7 +377,7 @@ class ApiAuth(models.Model):
                         'datas': image_data,
                         'mimetype': 'image/png',  # Adjust if the format is different
                     })
-                    print(f"Updated image in ir.attachment for product ID {product_id} with resolution {resolution}")
+                    _logger.info(f"Updated image in ir.attachment for product ID {product_id} with resolution {resolution}")
                 else:
                     # Create a new attachment if not found
                     self.env['ir.attachment'].create({
@@ -381,14 +389,14 @@ class ApiAuth(models.Model):
                         'res_field': resolution,  # Field matches the resolution name
                         'mimetype': 'image/png',  # Adjust if the format is different
                     })
-                    print(f"Image stored in ir.attachment for product ID {product_id} with resolution {resolution}")
+                    _logger.info(f"Image stored in ir.attachment for product ID {product_id} with resolution {resolution}")
 
         except requests.exceptions.RequestException as e:
-            print(f"Error downloading image: {e}")
+            _logger.error(f"Error downloading image: {e}")
         except TypeError as e:
-            print(f"TypeError: {e} - Check if all objects are iterable.")
+            _logger.error(f"TypeError: {e} - Check if all objects are iterable.")
         except Exception as e:
-            print(f"Unexpected error while storing image: {e}")
+           _logger.error(f"Unexpected error while storing image: {e}")
 
     @api.model
     def _create_or_update_categories_action(self, hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5):
@@ -425,7 +433,7 @@ class ApiAuth(models.Model):
 
                     if existing_pos_category:
                         parent_pos_category_id = existing_pos_category.id
-                        print(
+                        _logger.info(
                             f"POS Category {category_name} Code: {category_code} already exists. Setting its as Parent for next level")
                     else:
                         new_pos_category = self.env['pos.category'].create({
@@ -435,17 +443,17 @@ class ApiAuth(models.Model):
 
                         })
                         parent_pos_category_id = new_pos_category.id
-                        print(
+                        _logger.info(
                             f"POS Category {category_name} Code: {category_code} created. Set it as Parent for next level")
 
         return parent_pos_category_id, parent_product_category_id
+
     @api.model
     def _create_or_update_modifier_action(self, item, list_price):
         """Creates or updates product attributes and values for modifiers."""
         modifier_name = item.get('shortDisplayName', 'Unnamed Modifier')
         sirius_item_id = item.get('id')
-        print('***********************')
-
+        _logger.info('***********************')
 
         # Create or update the attribute
         attribute = self.env['product.attribute'].search([('name', '=', 'Sirius Attributes')], limit=1)
@@ -472,21 +480,21 @@ class ApiAuth(models.Model):
                 'sirius_item_id': sirius_item_id
 
             })
-            print(f"Created new modifier attribute value: {modifier_name}")
+            _logger.info(f"Created new modifier attribute value: {modifier_name}")
 
         else:
-            print(f"modifier attribute value: {modifier_name} already exists.")
+            _logger.info(f"modifier attribute value: {modifier_name} already exists.")
 
     @api.model
     def _create_or_update_modifier_group_action(self, modifier_group_data):
         """
         Creates or updates product attributes and values for modifiers groups.
         """
-        print(modifier_group_data)
+        _logger.debug(modifier_group_data)
         group_name = modifier_group_data.get('displayName')
         group_id = modifier_group_data.get('id')
 
-        print(f'Processing Modifier Group: {group_name}')
+        _logger.info(f'Processing Modifier Group: {group_name}')
 
         # Create or update the attribute
         attribute = self.env['product.attribute'].search([('name', '=', group_name)], limit=1)
@@ -503,9 +511,9 @@ class ApiAuth(models.Model):
         sirius_item_id = modifier_group_data.get('itemId')
     
         product = self.env['product.template'].search([('sirius_item_id', '=', sirius_item_id)], limit=1)
-        print('*****************************************************')
+        _logger.info('*****************************************************')
 
-        print(sirius_item_id)
+        _logger.info(sirius_item_id)
         
         attribute_value_ids = [] # Initialize a list to store all attribute value ids for this group
         for item_modifier in modifier_group_data.get('itemModifiers', []):
@@ -514,7 +522,7 @@ class ApiAuth(models.Model):
             line_product = self.env['product.template'].search([('sirius_item_id', '=', sirius_item_id_line)], limit=1)
             # print('*****************************************************')
 
-            print(line_product.list_price)
+            _logger.info(line_product.list_price)
             # Create or update attribute values for the modifiers
             
             existing_value = self.env['product.attribute.value'].search([
@@ -532,10 +540,10 @@ class ApiAuth(models.Model):
                     'sirius_item_id': sirius_item_id_line
                 })
                 attribute_value_ids.append(new_value.id)  #Add new attribute value id to the list
-                print(f"Created new modifier attribute value: {modifier_name} for group: {group_name}")
+                _logger.info(f"Created new modifier attribute value: {modifier_name} for group: {group_name}")
             else:
                 attribute_value_ids.append(existing_value.id) # Add existing attribute value id to the list
-                print(f"Modifier attribute value: {modifier_name} for group: {group_name} already exists.")
+                _logger.info(f"Modifier attribute value: {modifier_name} for group: {group_name} already exists.")
 
         if product:
               # Check if the attribute line already exists
@@ -550,11 +558,11 @@ class ApiAuth(models.Model):
                     'attribute_id': attribute.id,
                     'value_ids': [(6, 0, attribute_value_ids)], # Add all available values of this attribute
                     })
-                   print(f"Added attribute {group_name} to product: {product.name}")
+                   _logger.info(f"Added attribute {group_name} to product: {product.name}")
                 else:
                     # Update existing line's value_ids to include all available values
                     existing_line.write({'value_ids': [(6, 0, attribute_value_ids)]})
-                    print(f"Attribute {group_name} already exists for product: {product.name}. Updated values")
+                    _logger.info(f"Attribute {group_name} already exists for product: {product.name}. Updated values")
 
     def export_all_items(self):
         """
@@ -577,7 +585,7 @@ class ApiAuth(models.Model):
             # Set the last update time
             now = datetime.datetime.now(timezone.utc)
             config.set_param('bnayax_api.items_last_update', now.strftime("%Y-%m-%dT%H:%M:%S%z"))
-            print("First time items update finished")
+            _logger.info("First time items update finished")
         else:
             # Fetch updated items incrementally by day
             last_update_date = datetime.datetime.strptime(last_update_date_str, "%Y-%m-%dT%H:%M:%S%z")
@@ -587,13 +595,13 @@ class ApiAuth(models.Model):
                 # Construct a datetime object for the start of the current day
                 update_date = datetime.datetime.combine(current_date, datetime.time.min).replace(tzinfo=timezone.utc)
                 update_date_str = update_date.strftime("%Y-%m-%d") + 'T00%3A00%3A00%2B03%3A00'    
-                print(f"Fetching items updated on: {update_date_str}")
+                _logger.info(f"Fetching items updated on: {update_date_str}")
                 self._fetch_and_process_items(f"{base_url}?updateDate={update_date_str}", headers, is_modifier=False)
                 current_date += datetime.timedelta(days=1)
             
             # Set the last update time
             config.set_param('bnayax_api.items_last_update', now.strftime("%Y-%m-%dT%H:%M:%S%z"))
-            print("Regular items update finished")
+            _logger.info("Regular items update finished")
         
         return self.display_notification('Success', 'Complete Export All Items!', 'success')
 #mariel - updated here to check if there is image to call the _store_image_in_attachment method
@@ -603,7 +611,7 @@ class ApiAuth(models.Model):
             response = requests.post(api_url, headers=headers, timeout=30)
             response.raise_for_status()
             response_data = response.json()
-            print(f"API Response for {api_url}: {response_data}")
+            _logger.debug(f"API Response for {api_url}: {response_data}")
 
             if response_data and response_data.get('data') and response_data.get('data').get('responseList'):
                 for item in response_data['data']['responseList']:
@@ -669,7 +677,7 @@ class ApiAuth(models.Model):
                             'taxes_id': [(6, 0, [])],  # No taxes applied
                         }
                         new_product = self.env['product.template'].create(product_values)
-                        print(f"Created product {product_name} with ID {sirius_item_id}")
+                        _logger.info(f"Created product {product_name} with ID {sirius_item_id}")
 
                         # Attach the image if available
                         if image_url:
@@ -686,19 +694,19 @@ class ApiAuth(models.Model):
                             'is_modifier': False,
                             'prices': prices,
                             'list_price': list_price,
-                                                        'taxes_id': [(6, 0, [])],  # No taxes applied
+                            'taxes_id': [(6, 0, [])],  # No taxes applied
                         }
                         existing_product.write(product_values)
-                        print(f"Updated product {product_name} with ID {sirius_item_id}")
+                        _logger.info(f"Updated product {product_name} with ID {sirius_item_id}")
 
                         # Attach the image if available
                         if image_url:
                             self._store_image_in_attachment_action(image_url, existing_product.id)
         except requests.exceptions.RequestException as e:
-            print(f"API Request Error: {e}")
+            _logger.error(f"API Request Error: {e}")
             return {"error": str(e)}
         except Exception as e:
-            print(f"Unexpected Error: {e}")
+            _logger.error(f"Unexpected Error: {e}")
             return {"error": str(e)}
 
     @api.model
@@ -709,22 +717,22 @@ class ApiAuth(models.Model):
             response = requests.get(api_url, headers=headers, timeout=30)
             response.raise_for_status()
             response_data = response.json()
-            print(f"API Response for Modifier Full: {response_data}")
+            _logger.debug(f"API Response for Modifier Full: {response_data}")
 
             if response_data and response_data.get('data') and response_data.get('data').get('responseList'):
                 # Iterate through the responseList
                 for response_item in response_data.get('data').get('responseList'):
                     # Iterate through the groups array within each response item
                     for modifier_group in response_item.get('groups', []):
-                         print(modifier_group)
+                         _logger.debug(modifier_group)
                          self._create_or_update_modifier_group_action(modifier_group)
 
 
         except requests.exceptions.RequestException as e:
-            print(f"API Request Error: {e}")
-            return {"error": str(e)}
+           _logger.error(f"API Request Error: {e}")
+           return {"error": str(e)}
         except Exception as e:
-            print(f"Unexpected Error: {e}")
+            _logger.error(f"Unexpected Error: {e}")
             return {"error": str(e)}
 
     def export_all_modifiers(self):
@@ -745,6 +753,6 @@ class ApiAuth(models.Model):
     @api.model
     def _scheduler_export_all_items(self):
         """Scheduled method to print a statement every day ."""
-        print("Scheduled job: starting export all items.")
+        _logger.info("Scheduled job: starting export all items.")
         self.export_all_items()
-        print("Scheduled job: finished export all items.")
+        _logger.info("Scheduled job: finished export all items.")
