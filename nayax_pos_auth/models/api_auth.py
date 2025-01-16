@@ -7,7 +7,8 @@ import requests
 from odoo.addons.nayax_pos_auth.crypto_utils import decrypt_data, encrypt_data, generate_key, get_token
 from odoo.exceptions import UserError
 from odoo import _
-from build import _logger
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class ApiAuth(models.Model):
@@ -333,61 +334,227 @@ class ApiAuth(models.Model):
             }
         }
 
-    # def export_all_items(self):
-    #     """
-    #     Fetches items and modifiers from the API and creates/updates records in Odoo.
-    #     """
-    #     base_url = "https://gateway-api-srv.stage.bnayax.com/api/export/item"
-    #     config = self.env['ir.config_parameter'].sudo()
-    #     token = get_token(config)
+    @api.model
+    def _store_image_in_attachment_action(self, image_url, product_id):
+        """Helper method to store or update an image from a URL as attachments with different resolutions."""
+        try:
+            if not image_url:
+                print("No image URL provided.")
+                return
 
-    #     headers = {
-    #         "Authorization": f"Bearer {token.strip()}",
-    #     }
-    #     # Fetch regular items
-    #     self._fetch_and_process_items(f"{base_url}", headers, is_modifier=False)
+            # Download the image
+            image_response = requests.get(image_url, timeout=10)
+            image_response.raise_for_status()
+            image_data = base64.b64encode(image_response.content)
 
-    #     # Fetch modifiers
-    #     # self._fetch_and_process_items(f"{base_url}?showModifier=true", headers, is_modifier=True)
-    #     # self._fetch_and_process_modifiers_full(headers)
-    #     return self.display_notification('Success', 'Complete Export All Items!', 'success')
+            # Ensure image data exists
+            if not image_data:
+                print("No image data retrieved from the URL.")
+                return
 
-    # def export_all_items(self):
-    #     """
-    #     Fetches items and modifiers from the API and creates/updates records in Odoo.
-    #     """
-    #     base_url = "https://gateway-api-srv.stage.bnayax.com/api/export/item"
-    #     config = self.env['ir.config_parameter'].sudo()
-    #     token = get_token(config)
+            # Define the resolutions and their corresponding names
+            resolutions = ['image_1920', 'image_1024', 'image_512', 'image_256', 'image_128']
 
-    #     headers = {
-    #         "Authorization": f"Bearer {token.strip()}",
-    #     }
+            for resolution in resolutions:
+                # Check if the attachment already exists
+                existing_attachment = self.env['ir.attachment'].search([
+                    ('res_model', '=', 'product.template'),
+                    ('res_id', '=', product_id),
+                    ('res_field', '=', resolution),
+                ], limit=1)
 
-    #     # Get the flag that indicates if regular items were already fetched
-    #     items_fetched_flag = config.get_param('bnayax_api.items_fetched', default='False')
-       
+                if existing_attachment:
+                    # Update the existing attachment
+                    existing_attachment.write({
+                        'datas': image_data,
+                        'mimetype': 'image/png',  # Adjust if the format is different
+                    })
+                    print(f"Updated image in ir.attachment for product ID {product_id} with resolution {resolution}")
+                else:
+                    # Create a new attachment if not found
+                    self.env['ir.attachment'].create({
+                        'name': resolution,
+                        'type': 'binary',
+                        'datas': image_data,
+                        'res_model': 'product.template',
+                        'res_id': product_id,
+                        'res_field': resolution,  # Field matches the resolution name
+                        'mimetype': 'image/png',  # Adjust if the format is different
+                    })
+                    print(f"Image stored in ir.attachment for product ID {product_id} with resolution {resolution}")
 
-    #     if items_fetched_flag == 'False':
-    #         # Fetch regular items only if they haven't been fetched yet
-    #         self._fetch_and_process_items(f"{base_url}", headers, is_modifier=False)
+        except requests.exceptions.RequestException as e:
+            print(f"Error downloading image: {e}")
+        except TypeError as e:
+            print(f"TypeError: {e} - Check if all objects are iterable.")
+        except Exception as e:
+            print(f"Unexpected error while storing image: {e}")
 
-    #         # Set the flag to true, so it won't be executed again
-    #         config.set_param('bnayax_api.items_fetched', 'True')
-    #     else: 
-    #         if items_fetched_flag == 'True':
-    #             now = datetime.datetime.now(timezone.utc)
-    #             update_date = now.strftime("%Y-%m-%d")
-    #             update_date = update_date + 'T00%3A00%3A00%2B03%3A00'
-    #             print(update_date)
-    #             self._fetch_and_process_items(f"{base_url}?updateDate={update_date}", headers, is_modifier=False)
-    #         print("Regular items already fetched, skipping.")
+    @api.model
+    def _create_or_update_categories_action(self, hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5):
+        """Creates or updates product and POS categories based on the Nayax hierarchy."""
 
-    #     # Fetch modifiers
-    #     # self._fetch_and_process_items(f"{base_url}?showModifier=true", headers, is_modifier=True)
-    #     # self._fetch_and_process_modifiers_full(headers)
+        parent_product_category_id = False
+        parent_pos_category_id = False
+        categories = [hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5]
 
-    #     return self.display_notification('Success', 'Complete Export All Items!', 'success')
+        for category_level in categories:
+            if category_level:
+                category_name = category_level.get('displayName')
+                category_code = category_level.get('code')
+                if category_name and category_code:
+                    # Product Category handling
+                    existing_product_category = self.env['product.category'].search([
+                        ('nayax_category_code', '=', category_code),
+                        ('parent_id', '=', parent_product_category_id or False)], limit=1)
+
+                    if existing_product_category:
+                        parent_product_category_id = existing_product_category.id
+                    else:
+                        new_product_category = self.env['product.category'].create({
+                            'name': category_name,
+                            'nayax_category_code': category_code,
+                            'parent_id': parent_product_category_id or False,
+                        })
+                        parent_product_category_id = new_product_category.id
+
+                    # POS Category handling
+                    existing_pos_category = self.env['pos.category'].search([
+                        ('nayax_category_code', '=', category_code),
+                        ('parent_id', '=', parent_pos_category_id or False)], limit=1)
+
+                    if existing_pos_category:
+                        parent_pos_category_id = existing_pos_category.id
+                        print(
+                            f"POS Category {category_name} Code: {category_code} already exists. Setting its as Parent for next level")
+                    else:
+                        new_pos_category = self.env['pos.category'].create({
+                            'name': category_name,
+                            'nayax_category_code': category_code,
+                            'parent_id': parent_pos_category_id or False,
+
+                        })
+                        parent_pos_category_id = new_pos_category.id
+                        print(
+                            f"POS Category {category_name} Code: {category_code} created. Set it as Parent for next level")
+
+        return parent_pos_category_id, parent_product_category_id
+    @api.model
+    def _create_or_update_modifier_action(self, item, list_price):
+        """Creates or updates product attributes and values for modifiers."""
+        modifier_name = item.get('shortDisplayName', 'Unnamed Modifier')
+        sirius_item_id = item.get('id')
+        print('***********************')
+
+
+        # Create or update the attribute
+        attribute = self.env['product.attribute'].search([('name', '=', 'Sirius Attributes')], limit=1)
+        if not attribute:
+            attribute = self.env['product.attribute'].create({
+                'name': 'Sirius Attributes',
+                'display_type': 'multi',
+                'create_variant': 'no_variant',
+            })
+
+        # Create or update the attribute value
+        existing_value = self.env['product.attribute.value'].search([
+            ('attribute_id', '=', attribute.id),
+            ('name', '=', modifier_name),
+            ('default_extra_price', '=', list_price),
+            ('sirius_item_id', '=', sirius_item_id),
+
+        ], limit=1)
+        if not existing_value:
+            self.env['product.attribute.value'].create({
+                'attribute_id': attribute.id,
+                'name': modifier_name,
+                'default_extra_price': list_price,
+                'sirius_item_id': sirius_item_id
+
+            })
+            print(f"Created new modifier attribute value: {modifier_name}")
+
+        else:
+            print(f"modifier attribute value: {modifier_name} already exists.")
+
+    @api.model
+    def _create_or_update_modifier_group_action(self, modifier_group_data):
+        """
+        Creates or updates product attributes and values for modifiers groups.
+        """
+        print(modifier_group_data)
+        group_name = modifier_group_data.get('displayName')
+        group_id = modifier_group_data.get('id')
+
+        print(f'Processing Modifier Group: {group_name}')
+
+        # Create or update the attribute
+        attribute = self.env['product.attribute'].search([('name', '=', group_name)], limit=1)
+        if not attribute:
+            attribute = self.env['product.attribute'].create({
+                'name': group_name,
+                'display_type': 'multi',
+                'create_variant': 'no_variant',
+                'sirius_group_id': group_id
+            })
+        else:
+            # Update the attribute if it already exists
+            attribute.write({'sirius_group_id': group_id})
+        sirius_item_id = modifier_group_data.get('itemId')
+    
+        product = self.env['product.template'].search([('sirius_item_id', '=', sirius_item_id)], limit=1)
+        print('*****************************************************')
+
+        print(sirius_item_id)
+        
+        attribute_value_ids = [] # Initialize a list to store all attribute value ids for this group
+        for item_modifier in modifier_group_data.get('itemModifiers', []):
+            modifier_name = item_modifier.get('itemName')
+            sirius_item_id_line = item_modifier.get('itemId')
+            line_product = self.env['product.template'].search([('sirius_item_id', '=', sirius_item_id_line)], limit=1)
+            # print('*****************************************************')
+
+            print(line_product.list_price)
+            # Create or update attribute values for the modifiers
+            
+            existing_value = self.env['product.attribute.value'].search([
+                ('attribute_id', '=', attribute.id),
+                ('name', '=', modifier_name),
+                ('default_extra_price', '=', line_product.list_price),
+                ('sirius_item_id', '=', sirius_item_id_line)
+            ], limit=1)
+
+            if not existing_value:
+                new_value = self.env['product.attribute.value'].create({
+                    'attribute_id': attribute.id,
+                    'name': modifier_name,
+                    'default_extra_price': line_product.list_price,
+                    'sirius_item_id': sirius_item_id_line
+                })
+                attribute_value_ids.append(new_value.id)  #Add new attribute value id to the list
+                print(f"Created new modifier attribute value: {modifier_name} for group: {group_name}")
+            else:
+                attribute_value_ids.append(existing_value.id) # Add existing attribute value id to the list
+                print(f"Modifier attribute value: {modifier_name} for group: {group_name} already exists.")
+
+        if product:
+              # Check if the attribute line already exists
+                existing_line = self.env['product.template.attribute.line'].search([
+                    ('product_tmpl_id', '=', product.id),
+                    ('attribute_id', '=', attribute.id)
+                    ], limit=1)
+                
+                if not existing_line:
+                   self.env['product.template.attribute.line'].create({
+                    'product_tmpl_id': product.id,
+                    'attribute_id': attribute.id,
+                    'value_ids': [(6, 0, attribute_value_ids)], # Add all available values of this attribute
+                    })
+                   print(f"Added attribute {group_name} to product: {product.name}")
+                else:
+                    # Update existing line's value_ids to include all available values
+                    existing_line.write({'value_ids': [(6, 0, attribute_value_ids)]})
+                    print(f"Attribute {group_name} already exists for product: {product.name}. Updated values")
 
     def export_all_items(self):
         """
@@ -452,14 +619,13 @@ class ApiAuth(models.Model):
 
                     # Check hierarchy condition and create categories
                     if hierarchy1.get('id') != 6:
-                        pos_category_id, product_category_id = self._create_or_update_categories(
+                        pos_category_id, product_category_id = self._create_or_update_categories_action(
                             hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5
                         )
 
                     # Process modifiers
                     if is_modifier:
-                        self._create_or_update_modifier(item)
-                        
+                        self._create_or_update_modifier_action(item, 0.0)  # Use the modifier price
 
                     # Handle product pricing
                     else:
@@ -470,16 +636,8 @@ class ApiAuth(models.Model):
                             # Get the maximum price, default to 0 if prices are empty or invalid
                             max_price_item = max(prices, key=lambda p: p.get('price', 0.0))
                             max_price = max_price_item.get('price', 0.0)
- 
- 
-                            if item.get('isModifier') is True:
-                                list_price = max_price
- 
-                            # Apply discount only if there is a valid price
-                            else:
-                                if max_price > 0.0:
+                            if max_price > 0.0:
                                     list_price =max_price
-                                    # list_price =max_price
 
                     # Fetch the first image URL if available
                     image_url = None
@@ -515,7 +673,7 @@ class ApiAuth(models.Model):
 
                         # Attach the image if available
                         if image_url:
-                            self._store_image_in_attachment(image_url, new_product.id)
+                            self._store_image_in_attachment_action(image_url, new_product.id)
                     else:
                         # Update the existing product
                         product_values = {
@@ -528,170 +686,22 @@ class ApiAuth(models.Model):
                             'is_modifier': False,
                             'prices': prices,
                             'list_price': list_price,
-                            'taxes_id': [(6, 0, [])],  # No taxes applied
+                                                        'taxes_id': [(6, 0, [])],  # No taxes applied
                         }
                         existing_product.write(product_values)
                         print(f"Updated product {product_name} with ID {sirius_item_id}")
 
                         # Attach the image if available
                         if image_url:
-                            self._store_image_in_attachment(image_url, existing_product.id)
+                            self._store_image_in_attachment_action(image_url, existing_product.id)
         except requests.exceptions.RequestException as e:
             print(f"API Request Error: {e}")
             return {"error": str(e)}
         except Exception as e:
             print(f"Unexpected Error: {e}")
             return {"error": str(e)}
-            # mariel : added the new method to store image in attachment
-    def _store_image_in_attachment(self, image_url, product_id):
-        """
-        Helper method to store or update an image from a URL as attachments with different resolutions.
-        """
-        try:
-            if not image_url:
-                print("No image URL provided.")
-                return
 
-            # Download the image
-            image_response = requests.get(image_url, timeout=10)
-            image_response.raise_for_status()
-            image_data = base64.b64encode(image_response.content)
-
-            # Ensure image data exists
-            if not image_data:
-                print("No image data retrieved from the URL.")
-                return
-
-            # Define the resolutions and their corresponding names
-            resolutions = ['image_1920', 'image_1024', 'image_512', 'image_256', 'image_128']
-
-            for resolution in resolutions:
-                # Check if the attachment already exists
-                existing_attachment = self.env['ir.attachment'].search([
-                    ('res_model', '=', 'product.template'),
-                    ('res_id', '=', product_id),
-                    ('res_field', '=', resolution),
-                ], limit=1)
-
-                if existing_attachment:
-                    # Update the existing attachment
-                    existing_attachment.write({
-                        'datas': image_data,
-                        'mimetype': 'image/png',  # Adjust if the format is different
-                    })
-                    print(f"Updated image in ir.attachment for product ID {product_id} with resolution {resolution}")
-                else:
-                    # Create a new attachment if not found
-                    self.env['ir.attachment'].create({
-                        'name': resolution,
-                        'type': 'binary',
-                        'datas': image_data,
-                        'res_model': 'product.template',
-                        'res_id': product_id,
-                        'res_field': resolution,  # Field matches the resolution name
-                        'mimetype': 'image/png',  # Adjust if the format is different
-                    })
-                    print(f"Image stored in ir.attachment for product ID {product_id} with resolution {resolution}")
-
-        except requests.exceptions.RequestException as e:
-            print(f"Error downloading image: {e}")
-        except TypeError as e:
-            print(f"TypeError: {e} - Check if all objects are iterable.")
-        except Exception as e:
-            print(f"Unexpected error while storing image: {e}")
-
-    def _create_or_update_categories(self, hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5):
-        """Creates or updates product and POS categories based on the Nayax hierarchy."""
-
-        parent_product_category_id = False
-        parent_pos_category_id = False
-        categories = [hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5]
-
-        for category_level in categories:
-            if category_level:
-                category_name = category_level.get('displayName')
-                category_code = category_level.get('code')
-                if category_name and category_code:
-                    # Product Category handling
-                    existing_product_category = self.env['product.category'].search([
-                        ('nayax_category_code', '=', category_code),
-                        ('parent_id', '=', parent_product_category_id or False)], limit=1)
-
-                    if existing_product_category:
-                        parent_product_category_id = existing_product_category.id
-                    else:
-                        new_product_category = self.env['product.category'].create({
-                            'name': category_name,
-                            'nayax_category_code': category_code,
-                            'parent_id': parent_product_category_id or False,
-                        })
-                        parent_product_category_id = new_product_category.id
-
-                    # POS Category handling
-                    existing_pos_category = self.env['pos.category'].search([
-                        ('nayax_category_code', '=', category_code),
-                        ('parent_id', '=', parent_pos_category_id or False)], limit=1)
-
-                    if existing_pos_category:
-                        parent_pos_category_id = existing_pos_category.id
-                        print(
-                            f"POS Category {category_name} Code: {category_code} already exists. Setting its as Parent for next level")
-                    else:
-                        new_pos_category = self.env['pos.category'].create({
-                            'name': category_name,
-                            'nayax_category_code': category_code,
-                            'parent_id': parent_pos_category_id or False,
-
-                        })
-                        parent_pos_category_id = new_pos_category.id
-                        print(
-                            f"POS Category {category_name} Code: {category_code} created. Set it as Parent for next level")
-
-        return parent_pos_category_id, parent_product_category_id
-
-    def _create_or_update_modifier(self, item):
-        """Creates or updates product attributes and values for modifiers."""
-        modifier_name = item.get('shortDisplayName', 'Unnamed Modifier')
-        sirius_item_id = item.get('id')
-        print('***********************')
-
-        prices = 0
-
-        if prices not in [None, False]:
-            price = max(prices, key=lambda p: p.get('price', 0.0)).get('price', 0.0)
-        else:
-            price = 0.0
-        print(price)
-        # Create or update the attribute
-        attribute = self.env['product.attribute'].search([('name', '=', 'Sirius Attributes')], limit=1)
-        if not attribute:
-            attribute = self.env['product.attribute'].create({
-                'name': 'Sirius Attributes',
-                'display_type': 'multi',
-                'create_variant': 'no_variant',
-            })
-
-        # Create or update the attribute value
-        existing_value = self.env['product.attribute.value'].search([
-            ('attribute_id', '=', attribute.id),
-            ('name', '=', modifier_name),
-            ('default_extra_price', '=', price),
-            ('sirius_item_id', '=', sirius_item_id),
-
-        ], limit=1)
-        if not existing_value:
-            self.env['product.attribute.value'].create({
-                'attribute_id': attribute.id,
-                'name': modifier_name,
-                'default_extra_price': price,
-                'sirius_item_id': sirius_item_id
-
-            })
-            print(f"Created new modifier attribute value: {modifier_name}")
-
-        else:
-            print(f"modifier attribute value: {modifier_name} already exists.")
-
+    @api.model
     def _fetch_and_process_modifiers_full(self, headers):
         api_url = "https://gateway-api-srv.stage.bnayax.com/api/item/modifier/full"
 
@@ -707,7 +717,7 @@ class ApiAuth(models.Model):
                     # Iterate through the groups array within each response item
                     for modifier_group in response_item.get('groups', []):
                          print(modifier_group)
-                         self._create_or_update_modifier_group(modifier_group)
+                         self._create_or_update_modifier_group_action(modifier_group)
 
 
         except requests.exceptions.RequestException as e:
@@ -716,83 +726,6 @@ class ApiAuth(models.Model):
         except Exception as e:
             print(f"Unexpected Error: {e}")
             return {"error": str(e)}
-    def _create_or_update_modifier_group(self, modifier_group_data):
-        """
-        Creates or updates product attributes and values for modifiers groups.
-        """
-        print(modifier_group_data)
-        group_name = modifier_group_data.get('displayName')
-        group_id = modifier_group_data.get('id')
-
-        print(f'Processing Modifier Group: {group_name}')
-
-        # Create or update the attribute
-        attribute = self.env['product.attribute'].search([('name', '=', group_name)], limit=1)
-        if not attribute:
-            attribute = self.env['product.attribute'].create({
-                'name': group_name,
-                'display_type': 'multi',
-                'create_variant': 'no_variant',
-                'sirius_group_id': group_id
-            })
-        else:
-            # Update the attribute if it already exists
-            attribute.write({'sirius_group_id': group_id})
-        sirius_item_id = modifier_group_data.get('itemId')
-    
-        product = self.env['product.template'].search([('sirius_item_id', '=', sirius_item_id)], limit=1)
-        print('*****************************************************')
-
-        print(sirius_item_id)
-        
-        attribute_value_ids = [] # Initialize a list to store all attribute value ids for this group
-        for item_modifier in modifier_group_data.get('itemModifiers', []):
-            modifier_name = item_modifier.get('itemName')
-            sirius_item_id_line = item_modifier.get('itemId')
-            line_product = self.env['product.template'].search([('sirius_item_id', '=', sirius_item_id_line)], limit=1)
-            # print('*****************************************************')
-
-            print(line_product.list_price)
-            # Create or update attribute values for the modifiers
-            
-            existing_value = self.env['product.attribute.value'].search([
-                ('attribute_id', '=', attribute.id),
-                ('name', '=', modifier_name),
-                 ('default_extra_price', '=', line_product.list_price),
-                ('sirius_item_id', '=', sirius_item_id_line)
-            ], limit=1)
-
-            if not existing_value:
-                new_value = self.env['product.attribute.value'].create({
-                    'attribute_id': attribute.id,
-                    'name': modifier_name,
-                    'default_extra_price': line_product.list_price,
-                    'sirius_item_id': sirius_item_id_line
-                })
-                attribute_value_ids.append(new_value.id)  #Add new attribute value id to the list
-                print(f"Created new modifier attribute value: {modifier_name} for group: {group_name}")
-            else:
-                attribute_value_ids.append(existing_value.id) # Add existing attribute value id to the list
-                print(f"Modifier attribute value: {modifier_name} for group: {group_name} already exists.")
-
-        if product:
-              # Check if the attribute line already exists
-                existing_line = self.env['product.template.attribute.line'].search([
-                    ('product_tmpl_id', '=', product.id),
-                    ('attribute_id', '=', attribute.id)
-                    ], limit=1)
-                
-                if not existing_line:
-                   self.env['product.template.attribute.line'].create({
-                    'product_tmpl_id': product.id,
-                    'attribute_id': attribute.id,
-                    'value_ids': [(6, 0, attribute_value_ids)], # Add all available values of this attribute
-                    })
-                   print(f"Added attribute {group_name} to product: {product.name}")
-                else:
-                    # Update existing line's value_ids to include all available values
-                    existing_line.write({'value_ids': [(6, 0, attribute_value_ids)]})
-                    print(f"Attribute {group_name} already exists for product: {product.name}. Updated values")
 
     def export_all_modifiers(self):
         """
@@ -809,8 +742,6 @@ class ApiAuth(models.Model):
 
         return self.display_notification('Success', 'Complete Export All Modifiers!', 'success')
     
-
-    #the shcedule export items with print statements (Rami)
     @api.model
     def _scheduler_export_all_items(self):
         """Scheduled method to print a statement every day ."""
