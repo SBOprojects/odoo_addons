@@ -45,10 +45,7 @@ export class selfOrderIndex extends Component {
         }
     }
     get selfIsReady() {
-        return this.selfOrder.models["product.product"].length > 0 && this.selfOrder.models["account.tax"].length > 0;
-    }
-    get isDataLoading(){
-        return this.selfOrder.models["account.tax"].length === 0
+         return this.selfOrder.models["product.product"].length > 0;
     }
 }
 whenReady(() => mountComponent(selfOrderIndex, document.body));
