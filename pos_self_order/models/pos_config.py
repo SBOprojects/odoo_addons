@@ -282,9 +282,12 @@ class PosConfig(models.Model):
             try:
                 if model == 'product.product' and not load_all:
                     response[model] = self._load_partial_products(response)
+                elif (model == 'account.tax' or model == 'account.tax.group') and not load_all:
+                     response[model] = self.env[model]._load_pos_self_data(response)
 
                 else:
                     response[model] = self.env[model]._load_pos_self_data(response)
+
 
                 self.env['pos.session']._load_pos_data_relations(model, response)
             except AccessError as e:
@@ -295,6 +298,8 @@ class PosConfig(models.Model):
                 }
 
                 self.env['pos.session']._load_pos_data_relations(model, response)
+        if load_all and self.self_ordering_initial_data_loaded:
+           return response
         if load_all:
             self.self_ordering_initial_data_loaded = True
         return response

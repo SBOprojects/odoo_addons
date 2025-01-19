@@ -11,8 +11,8 @@ patch(PosData.prototype, {
         if (!response["pos.config"].data[0]["self_ordering_initial_data_loaded"]) {
             setTimeout(async () => {
                 await rpc(`/pos-self/data/${parseInt(configId)}`);
-             }, 500)
-         }
+            }, 500);
+        }
         return response;
     },
     get databaseName() {
