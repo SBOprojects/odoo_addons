@@ -1,6 +1,6 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.ProductListPage">
-               <style>
+        <style>
                 /* Ensure overflow and scrolling behavior for categories */
                 #listgroup-categories {
                     display: grid !important;
@@ -322,6 +322,14 @@
                     padding-top: 10px;
                     /* Minimum padding on top */
                 }
+
+                /* Loading more div at the bottom */
+                .loading-more {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                }
             </style>
 
         <div class="d-flex flex-column vh-100">
@@ -386,38 +394,31 @@
                         <div class="loading-spinner"></div>
                    </div>
                 </t>
-                 <t t-set="nbrItem" t-value="0" />
-                <t t-if="selfOrder.currentCategory and selfOrder.currentCategory.id">
-                    <section
-                        t-attf-id="scrollspy_{{selfOrder.currentCategory?.id}}"
-                        t-attf-categId="{{selfOrder.currentCategory?.id}}"
-                        t-ref="productsWithCategory_{{selfOrder.currentCategory?.id}}"
-                        class="product-list-category d-empty-none px-3 pb-4"> <!--removed bg-view-->
-                        
-                        <t t-set="products" t-value="this.getProductsForCategory(selfOrder.currentCategory) || []" />
-                        <t t-set="availableProducts" t-value="products" />
-                        <t t-set="nbrItem" t-value="availableProducts.length" />
-                        <t t-if="availableProducts.length > 0">
-                            <!-- The category name is now in the navigation bar
-                                <div class="pt-4 pb-2 px-3 mb-4 mx-n3 bg-200 fw-bold">
-                                <h2 t-esc="selfOrder.currentCategory.name"/>
-                                <span t-if="selfOrder.currentCategory and !selfOrder.isCategoryAvailable(selfOrder.currentCategory.id)" class="unavailable-text">Unavailable at this time of the day</span>
-                            </div> -->
+                    <t t-if="selfOrder.currentCategory and selfOrder.currentCategory.id">
+                        <section
+                            t-attf-id="scrollspy_{{selfOrder.currentCategory?.id}}"
+                            t-attf-categId="{{selfOrder.currentCategory?.id}}"
+                            t-ref="productsWithCategory_{{selfOrder.currentCategory?.id}}"
+                            class="product-list-category d-empty-none px-3 pb-4">
                             <div class="o-so-products-row">
-                                <t t-foreach="availableProducts" t-as="product" t-key="product.id">
+                                <t t-foreach="state.displayedProducts" t-as="product" t-key="product.id">
                                     <ProductCard product="product" currentProductCard="product.id === selfOrder.lastEditedProductId and currentProductCard" />
                                 </t>
                             </div>
+                        </section>
+                         <div t-if="state.loadingMoreProducts" class="loading-more">
+                         <div class="loading-spinner"></div>
+                        </div>
+                         <t t-if="state.noMoreProducts && state.displayedProducts.length > 0" >
+                          <div class="mx-auto mt-3 text-center">
+                            <p>No more products in this category.</p>
+                        </div>
                         </t>
-                    </section>
-                    
-                </t>
-                <p t-if="nbrItem === 0 and selfOrder.currentCategory" class="mx-auto mt-3 text-center">
-                </p>
-                <p t-if="!selfOrder.currentCategory" class="mx-auto mt-3 text-center">
+                    </t>
+                <p t-if="state.displayedProducts.length === 0 and !selfOrder.currentCategory and !state.loading" class="mx-auto mt-3 text-center">
                     <!-- This message could show if there's truly no category selected,
                         or you can label it as "Uncategorized" if you prefer. -->
-                    <!-- No products found for uncategorized -->
+                        No products found for uncategorized
                 </p>
             </div>
 

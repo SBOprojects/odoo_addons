@@ -6,6 +6,8 @@ import { useService, useChildRef } from "@web/core/utils/hooks";
 import { OrderWidget } from "@pos_self_order/app/components/order_widget/order_widget";
 import { _t } from "@web/core/l10n/translation";
 
+const BATCH_SIZE = 6;
+
 export class ProductListPage extends Component {
     static template = "pos_self_order.ProductListPage";
     static components = { ProductCard, OrderWidget };
@@ -13,15 +15,23 @@ export class ProductListPage extends Component {
 
     setup() {
         this.selfOrder = useSelfOrder();
-
         this.dialog = useService("dialog");
         this.router = useService("router");
         this.productsList = useRef("productsList");
         this.categoryList = useRef("categoryList");
         this.currentProductCard = useChildRef();
         this.orm = useService("orm");
-        this.state = useState({ products: [], loading: false });
-
+        this.observer = null; // Observer for infinite scroll
+        this.state = useState({
+            loading: false,
+            displayedProducts: [], // Products shown to the user
+            allProducts: [], // All the products for the category (used for lazy loading)
+            loadingMoreProducts: false,
+            noMoreProducts: false,
+            currentBatchStart: 0, // Track what products to load next,
+            initialLoading: true,
+            abortController: null, // To abort ongoing fetch requests
+        });
 
         useEffect(
             () => {
@@ -31,7 +41,6 @@ export class ProductListPage extends Component {
                 if (this.selfOrder.lastEditedProductId) {
                     this.scrollTo(this.currentProductCard, { behavior: "instant" });
                 }
-
             },
             () => []
         );
@@ -60,8 +69,21 @@ export class ProductListPage extends Component {
         );
 
         useEffect(() => {
-             this.fetchProducts();
-        }, () => [this.selfOrder.currentCategory])
+            if (this.state.initialLoading) {
+                this.fetchData();
+            }
+            return () => {
+                if (this.observer) {
+                    this.observer.disconnect();
+                    this.observer = null;
+                }
+                //Cancel pending requests
+                 if (this.state.abortController){
+                     this.state.abortController.abort();
+                    this.state.abortController = null;
+                  }
+            };
+        }, () => [this.selfOrder.currentCategory]);
 
         onWillStart(async () => {
             await this.selfOrder.computeAvailableCategories();
@@ -95,8 +117,15 @@ export class ProductListPage extends Component {
         if (this.selfOrder.currentCategoryStack.length > 1) {
             this.selfOrder.currentCategoryStack.pop();
             this.selfOrder.currentCategory = this.selfOrder.currentCategoryStack[this.selfOrder.currentCategoryStack.length - 1];
-        } else {
-            this.selfOrder.currentCategory = null;
+
+             // Force a page refresh if navigating to main category
+           if (!this.selfOrder.currentCategory) {
+              window.location.reload(); // or use a more specific router based refresh
+          }
+       } else {
+              this.selfOrder.currentCategory = null;
+        // Force a page refresh if the category stack is empty (we're at the root)
+         window.location.reload(); // or use a more specific router based refresh
         }
     }
 
@@ -125,100 +154,145 @@ export class ProductListPage extends Component {
         });
     }
 
-    async fetchProducts() {
-          this.state.loading = true;
+    async fetchData() {
+        this.state.initialLoading = false;
         try {
-          const category = this.selfOrder.currentCategory;
-          let products;
-          if (!category) {
-               products = await this.getUncategorizedProducts();
-          }
-          else if (typeof category.parent_id === 'object' && category.parent_id !== null ) {
-               products = this.selfOrder.productByCategIds[category.id] || [];
-          }
-          else {
-               products = await this.getProductsForParentCategory(category);
-          }
-  
-           this.state.products = products;
-        } finally{
-               this.state.loading = false;
+            await this.selfOrder.getOrdersFromServer();
         }
-      }
+        catch (error) {
+            console.error("error while loading initial data in the product page:", error)
+        } finally {
+            await this.initializeProductLoading();
+        }
+    }
 
+    async initializeProductLoading() {
+        this.state.loading = true;
+        this.state.displayedProducts = []; // Reset when category change
+        this.state.currentBatchStart = 0;
+        this.state.noMoreProducts = false;
+        this.state.allProducts = []; // Initialize the array
 
-    getProductsForCategory() {
-         return this.state.products;
+       if (this.observer) {
+             this.observer.disconnect();
+             this.observer = null;
+         }
+        //Abort any ongoing requests
+        if (this.state.abortController){
+            this.state.abortController.abort();
+             this.state.abortController = null;
+         }
+        await this.fetchProducts();
+        this.observeProducts();
+    }
+
+    async fetchProducts() {
+        // Abort any ongoing requests before starting a new one
+          if (this.state.abortController){
+            this.state.abortController.abort();
+            this.state.abortController = null;
+         }
+        this.state.loading = true;
+         this.state.abortController = new AbortController(); // Create a new AbortController
+        try {
+
+             const category = this.selfOrder.currentCategory;
+             let products;
+             if (!category) {
+               products = await this.getUncategorizedProducts(this.state.abortController.signal); // pass the signal to the fetch methods
+            }
+            else {
+                products = this.getProductsForCategory(category);
+            }
+            // Here we add the products directly to the state
+            this.state.allProducts = products;
+           } finally {
+            this.state.loading = false;
+          }
     }
 
 
-    async getUncategorizedProducts() {
+    getProductsForCategory(category) {
+        if (!category) {
+            return [];
+        }
+
+        if (this.selfOrder.productByCategIds[category.id]) {
+            return this.selfOrder.productByCategIds[category.id];
+        }
+
+        return [];
+    }
+
+
+    async getUncategorizedProducts(signal) { //Pass the abortController signal as a param
         const uncategorized = [];
         if (!this.selfOrder.allProducts) return uncategorized;
-        
+
         const productTemplateIds = [];
-        for(const product of this.selfOrder.allProducts) {
-            if (!product.categ_id) {
-               productTemplateIds.push(product._raw.product_tmpl_id)
-            }
-        }
-        
-          if(productTemplateIds.length == 0) return [];
-
-        const productTemplates = await this.orm.searchRead("product.template", [
-          ["id", "in", productTemplateIds]
-        ]);
-
-          const modifierProductTemplateIds = productTemplates
-              .filter((template) => template.is_modifier)
-              .map((template) => template.id);
-
         for (const product of this.selfOrder.allProducts) {
-           if(!product.categ_id && !modifierProductTemplateIds.includes(product._raw.product_tmpl_id)){
-            uncategorized.push(product);
-           }
-       }
-       return uncategorized;
-    }
-
-
-      async getProductsForParentCategory(parentCategory) {
-        let allProducts = [];
-    
-        if (this.selfOrder.productByCategIds[parentCategory.id]) {
-            allProducts.push(...(this.selfOrder.productByCategIds[parentCategory.id] || []));
-        }
-        if (parentCategory.child_ids && parentCategory.child_ids.length > 0) {
-           for (const childCategory of parentCategory.child_ids) {
-                if (this.selfOrder.productByCategIds[childCategory.id]) {
-                allProducts.push(...(this.selfOrder.productByCategIds[childCategory.id] || []));
-              }
+            if (!product.categ_id) {
+                productTemplateIds.push(product._raw.product_tmpl_id)
             }
+        }
+
+         if (productTemplateIds.length === 0) {
+            return [];
          }
 
-        
-        if (allProducts.length === 0) return [];
-
-         const productTemplateIds = allProducts.map(product => product._raw.product_tmpl_id);
-
-
-        const productTemplates = await this.orm.searchRead("product.template", [
+         const productTemplates = await this.orm.searchRead("product.template", [
            ["id", "in", productTemplateIds]
-        ]);
+         ], {signal: signal}); // pass the signal to the orm call to abort
 
-         const modifierProductTemplateIds = productTemplates
-           .filter((template) => template.is_modifier)
-           .map((template) => template.id);
+        const modifierProductTemplateIds = productTemplates
+            .filter((template) => template.is_modifier)
+            .map((template) => template.id);
 
-        const filteredProducts = allProducts.filter(product => !modifierProductTemplateIds.includes(product._raw.product_tmpl_id));
+        for (const product of this.selfOrder.allProducts) {
+            if (!product.categ_id && !modifierProductTemplateIds.includes(product._raw.product_tmpl_id)) {
+                uncategorized.push(product);
+            }
+        }
 
-          return filteredProducts;
+        return uncategorized;
     }
-    hasChildCategories(category) {
-        return this.selfOrder.availableCategories.some(c => c.parent_id === category.id);
-    }
 
-    getChildCategories(category) {
-        return this.selfOrder.availableCategories.filter(c => c.parent_id === category.id);
-    }
+
+    loadMoreProducts = () => {
+        if (this.state.loadingMoreProducts || this.state.noMoreProducts || this.state.loading) {
+            return;
+        }
+        if (this.state.allProducts.length <= this.state.currentBatchStart) {
+            this.state.noMoreProducts = true;
+            return;
+        }
+        this.state.loadingMoreProducts = true;
+        const start = this.state.currentBatchStart;
+        const end = start + BATCH_SIZE;
+        const nextProducts = this.state.allProducts.slice(start, end);
+
+        if (nextProducts.length === 0) {
+            this.state.noMoreProducts = true;
+            this.state.loadingMoreProducts = false
+            return;
+        }
+        this.state.displayedProducts = [...this.state.displayedProducts, ...nextProducts];
+        this.state.currentBatchStart = end;
+        this.state.loadingMoreProducts = false;
+    };
+
+
+    observeProducts() {
+        this.observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                this.loadMoreProducts();
+            }
+        }, { threshold: 0.8 });
+
+        if (this.productsList.el) {
+            this.observer.observe(this.productsList.el.lastElementChild);
+            //load the first batch of products when the observer is active for the first time.
+            this.loadMoreProducts();
+        }
+    };
 }
