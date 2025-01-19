@@ -87,6 +87,8 @@ class PosConfig(models.Model):
         help="Name of the image to display on the self order screen",
     )
     has_paper = fields.Boolean("Has paper", default=True)
+    self_ordering_initial_data_loaded = fields.Boolean(default=False)
+
 
     def _update_access_token(self):
         self.access_token = uuid.uuid4().hex[:16]
@@ -262,7 +264,7 @@ class PosConfig(models.Model):
             'res.lang', 'product.attribute', 'product.attribute.custom.value', 'product.template.attribute.line', 'product.template.attribute.value',
             'decimal.precision', 'uom.uom', 'pos.printer', 'pos_self_order.custom_link', 'restaurant.floor', 'restaurant.table', 'account.cash.rounding']
 
-    def load_self_data(self):
+    def load_self_data(self, load_all=False):
         # Init our first record, in case of self_order is pos_config
         config_fields = self._load_pos_self_data_fields(self.id)
         response = {
@@ -278,7 +280,12 @@ class PosConfig(models.Model):
         # Classic data loading
         for model in self._load_self_data_models():
             try:
-                response[model] = self.env[model]._load_pos_self_data(response)
+                if model == 'product.product' and not load_all:
+                    response[model] = self._load_partial_products(response)
+
+                else:
+                    response[model] = self.env[model]._load_pos_self_data(response)
+
                 self.env['pos.session']._load_pos_data_relations(model, response)
             except AccessError as e:
                 response[model] = {
@@ -288,8 +295,22 @@ class PosConfig(models.Model):
                 }
 
                 self.env['pos.session']._load_pos_data_relations(model, response)
-
+        if load_all:
+            self.self_ordering_initial_data_loaded = True
         return response
+
+    def _load_partial_products(self, response):
+        product_fields = self.env['product.product']._load_pos_self_data_fields(self.id)
+        # Load 10 products of each category
+        products = self.env['product.product'].search(
+             [],
+             limit=100,
+         )
+        
+        return {
+            'data': products.read(product_fields, load=False),
+             'fields': product_fields,
+         }
 
     def _split_qr_codes_list(self, floors: List[Dict], cols: int) -> List[Dict]:
         """

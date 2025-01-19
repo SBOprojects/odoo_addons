@@ -6,7 +6,14 @@ import { rpc } from "@web/core/network/rpc";
 patch(PosData.prototype, {
     async loadInitialData() {
         const configId = session.data.config_id;
-        return await rpc(`/pos-self/data/${parseInt(configId)}`);
+        const response = await rpc(`/pos-self/data/${parseInt(configId)}`);
+
+        if (!response["pos.config"].data[0]["self_ordering_initial_data_loaded"]) {
+            setTimeout(async () => {
+                await rpc(`/pos-self/data/${parseInt(configId)}`);
+             }, 500)
+         }
+        return response;
     },
     get databaseName() {
         return `self_order-config-id_${session.data.config_id}_${session.data.access_token}`;

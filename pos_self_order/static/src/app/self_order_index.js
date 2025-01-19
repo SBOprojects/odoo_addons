@@ -1,3 +1,4 @@
+
 import { Component, whenReady } from "@odoo/owl";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { useSelfOrder } from "@pos_self_order/app/self_order_service";
@@ -45,7 +46,7 @@ export class selfOrderIndex extends Component {
         }
     }
     get selfIsReady() {
-        return this.selfOrder.models["product.product"].length > 0;
+       return this.selfOrder.models["product.product"].length > 0;
     }
 }
 whenReady(() => mountComponent(selfOrderIndex, document.body));

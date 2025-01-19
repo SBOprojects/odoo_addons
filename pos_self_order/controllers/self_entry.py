@@ -29,7 +29,10 @@ class PosSelfKiosk(http.Controller):
     @http.route("/pos-self/data/<config_id>", type='json', auth='public')
     def get_self_ordering_data(self, config_id=None, access_token=None, table_identifier=None):
         pos_config, _, _ = self._verify_entry_access(config_id, access_token, table_identifier)
-        data = pos_config.load_self_data()
+        if not pos_config.self_ordering_initial_data_loaded:
+            data = pos_config.load_self_data(load_all=False)
+        else:
+            data = pos_config.load_self_data(load_all=True)
         return data
 
     def _verify_entry_access(self, config_id=None, access_token=None, table_identifier=None):
