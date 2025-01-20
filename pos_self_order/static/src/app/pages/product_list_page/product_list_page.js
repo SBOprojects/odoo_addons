@@ -85,6 +85,16 @@ export class ProductListPage extends Component {
             };
         }, () => [this.selfOrder.currentCategory]);
 
+        useEffect(
+           () => {
+                const category = this.selfOrder.currentCategory;
+               if (category === null && !this.state.initialLoading) {
+                  this.initializeProductLoading();
+               }
+          },
+          () => [this.selfOrder.currentCategory]
+      );
+
         onWillStart(async () => {
             await this.selfOrder.computeAvailableCategories();
             // Fill productByCategIds map during setup
@@ -117,15 +127,8 @@ export class ProductListPage extends Component {
         if (this.selfOrder.currentCategoryStack.length > 1) {
             this.selfOrder.currentCategoryStack.pop();
             this.selfOrder.currentCategory = this.selfOrder.currentCategoryStack[this.selfOrder.currentCategoryStack.length - 1];
-
-             // Force a page refresh if navigating to main category
-           if (!this.selfOrder.currentCategory) {
-              window.location.reload(); // or use a more specific router based refresh
-          }
        } else {
-              this.selfOrder.currentCategory = null;
-        // Force a page refresh if the category stack is empty (we're at the root)
-         window.location.reload(); // or use a more specific router based refresh
+             this.selfOrder.currentCategory = null;
         }
     }
 

@@ -15,6 +15,7 @@ import { OrdersHistoryPage } from "@pos_self_order/app/pages/order_history_page/
 import { LoadingOverlay } from "@pos_self_order/app/components/loading_overlay/loading_overlay";
 import { mountComponent } from "@web/env";
 import { hasTouch } from "@web/core/browser/feature_detection";
+import { useState } from "@odoo/owl";
 
 export class selfOrderIndex extends Component {
     static template = "pos_self_order.selfOrderIndex";
@@ -34,8 +35,7 @@ export class selfOrderIndex extends Component {
         LoadingOverlay,
         MainComponentsContainer,
     };
-
-    setup() {
+      setup() {
         this.selfOrder = useSelfOrder();
         window.posmodel = this.selfOrder;
 
@@ -43,9 +43,18 @@ export class selfOrderIndex extends Component {
         if (hasTouch()) {
             document.body.classList.add("touch-device");
         }
+          this.state = useState({
+                loading: true,
+            });
+          setTimeout(() => {
+            this.state.loading = false
+          }, 100)
     }
     get selfIsReady() {
-         return this.selfOrder.models["product.product"].length > 0;
+        return this.selfOrder.models["product.product"].length > 0;
+    }
+   get isDataLoading() {
+        return this.state.loading;
     }
 }
 whenReady(() => mountComponent(selfOrderIndex, document.body));

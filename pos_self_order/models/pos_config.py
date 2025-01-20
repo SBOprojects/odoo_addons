@@ -87,8 +87,6 @@ class PosConfig(models.Model):
         help="Name of the image to display on the self order screen",
     )
     has_paper = fields.Boolean("Has paper", default=True)
-    # Remove this field, as it is causing the issue in loading
-    #self_ordering_initial_data_loaded = fields.Boolean(default=False)
 
 
     def _update_access_token(self):
@@ -260,10 +258,10 @@ class PosConfig(models.Model):
         return encoded_images
 
     def _load_self_data_models(self):
-        return ['pos.session', 'pos.order', 'pos.order.line', 'pos.payment', 'pos.payment.method', 'res.currency', 'pos.category', 'product.product', 'product.combo', 'product.combo.item',
+         return ['pos.session', 'pos.order', 'pos.order.line', 'pos.payment', 'pos.payment.method', 'res.currency', 'pos.category', 'product.product',
             'res.company', 'account.tax', 'account.tax.group', 'pos.printer', 'res.country', 'product.pricelist', 'product.pricelist.item', 'account.fiscal.position', 'account.fiscal.position.tax',
-            'res.lang', 'product.attribute', 'product.attribute.custom.value', 'product.template.attribute.line', 'product.template.attribute.value',
-            'decimal.precision', 'uom.uom', 'pos.printer', 'pos_self_order.custom_link', 'restaurant.floor', 'restaurant.table', 'account.cash.rounding']
+            'res.lang',  'decimal.precision', 'uom.uom', 'pos.printer', 'pos_self_order.custom_link', 'restaurant.floor', 'restaurant.table', 'account.cash.rounding']
+
 
     def load_self_data(self):
         # Init our first record, in case of self_order is pos_config
@@ -277,8 +275,8 @@ class PosConfig(models.Model):
         response['pos.config']['data'][0]['_self_ordering_image_home_ids'] = self._get_self_ordering_attachment(self.self_ordering_image_home_ids)
         response['pos.config']['data'][0]['_pos_special_products_ids'] = self._get_special_products().ids
         self.env['pos.session']._load_pos_data_relations('pos.config', response)
-
-        # Classic data loading
+        
+          # Classic data loading
         for model in self._load_self_data_models():
             try:
                 response[model] = self.env[model]._load_pos_self_data(response)
@@ -289,12 +287,29 @@ class PosConfig(models.Model):
                     'fields': self.env[model]._load_pos_self_data_fields(self.id),
                     'error': e.args[0]
                 }
-
                 self.env['pos.session']._load_pos_data_relations(model, response)
 
+        # load combos and items after the load of products.
+        try:
+                response['product.combo'] = self.env['product.combo']._load_pos_self_data(response)
+                self.env['pos.session']._load_pos_data_relations('product.combo', response)
+                response['product.combo.item'] = self.env['product.combo.item']._load_pos_self_data(response)
+                self.env['pos.session']._load_pos_data_relations('product.combo.item', response)
+        except AccessError as e:
+            response['product.combo'] = {
+                'data': [],
+                'fields': self.env['product.combo']._load_pos_self_data_fields(self.id),
+                'error': e.args[0]
+            }
+            response['product.combo.item'] = {
+                'data': [],
+                'fields': self.env['product.combo.item']._load_pos_self_data_fields(self.id),
+                'error': e.args[0]
+            }
+            self.env['pos.session']._load_pos_data_relations('product.combo', response)
+            self.env['pos.session']._load_pos_data_relations('product.combo.item', response)
+
         return response
-
-
 
     def _split_qr_codes_list(self, floors: List[Dict], cols: int) -> List[Dict]:
         """
