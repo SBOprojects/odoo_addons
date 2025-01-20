@@ -118,15 +118,14 @@ export class ProductListPage extends Component {
             this.selfOrder.currentCategoryStack.pop();
             this.selfOrder.currentCategory = this.selfOrder.currentCategoryStack[this.selfOrder.currentCategoryStack.length - 1];
 
-             // Force a page refresh if navigating to main category
-           if (!this.selfOrder.currentCategory) {
-              window.location.reload(); // or use a more specific router based refresh
-          }
+            // Trigger product loading on navigation
+            this.initializeProductLoading();
+           
        } else {
-              this.selfOrder.currentCategory = null;
-        // Force a page refresh if the category stack is empty (we're at the root)
-         window.location.reload(); // or use a more specific router based refresh
-        }
+             this.selfOrder.currentCategory = null;
+              // Trigger product loading on navigation
+             this.initializeProductLoading();
+         }
     }
 
     scrollTo(ref = null, { behavior = "smooth" } = {}) {
