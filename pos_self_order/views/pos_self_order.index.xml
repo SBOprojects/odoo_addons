@@ -18,6 +18,14 @@
                 <t t-if="'tests' in debug or test_mode_enabled" t-call-assets="pos_self_order.assets_tests" />
             </head>
             <body>
+                <div id="initial-loading" class="initial-loading-overlay">
+                    <div class="loading-content">
+                        <h1 class="loading-title mb-4">Loading Menu</h1>
+                        <div class="loading-spinner mb-4"></div>
+                        <p class="loading-message">Please wait while we prepare your experience...</p>
+                    </div>
+                </div>
+                <div id="self-order-root"></div>
             </body>
         </html>
     </template>

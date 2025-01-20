@@ -35,17 +35,27 @@ export class selfOrderIndex extends Component {
         MainComponentsContainer,
     };
 
-    setup() {
-        this.selfOrder = useSelfOrder();
-        window.posmodel = this.selfOrder;
+    async setup() {
+        const initialLoadingEl = document.getElementById('initial-loading');
+        try {
+            this.selfOrder = await useSelfOrder();
+            window.posmodel = this.selfOrder;
 
-        // Disable cursor on touch devices (required on IoT Box Kiosk)
-        if (hasTouch()) {
-            document.body.classList.add("touch-device");
+            // Disable cursor on touch devices (required on IoT Box Kiosk)
+            if (hasTouch()) {
+                document.body.classList.add("touch-device");
+            }
+        } finally {
+            // Remove loading screen once setup is complete
+            if (initialLoadingEl) {
+                initialLoadingEl.remove();
+            }
         }
     }
+
     get selfIsReady() {
-         return this.selfOrder.models["product.product"].length > 0;
+        return this.selfOrder.models["product.product"].length > 0;
     }
 }
-whenReady(() => mountComponent(selfOrderIndex, document.body));
+
+whenReady(() => mountComponent(selfOrderIndex, document.getElementById('self-order-root')));
