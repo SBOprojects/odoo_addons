@@ -13,10 +13,10 @@ class PosLoadMixin(models.AbstractModel):
     def _load_pos_self_data_fields(self, config_id):
         return self._load_pos_data_fields(config_id)
 
-    def _load_pos_self_data(self, data):
+    def _load_pos_self_data(self, data, limit=None):
         domain = self._load_pos_self_data_domain(data)
         fields = self._load_pos_self_data_fields(data['pos.config']['data'][0]['id'])
         return {
-            'data': self.search_read(domain, fields, load=False),
+            'data': self.search_read(domain, fields, limit=limit, load=False),
             'fields': fields,
         }

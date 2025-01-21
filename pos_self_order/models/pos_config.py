@@ -278,10 +278,17 @@ class PosConfig(models.Model):
         response['pos.config']['data'][0]['_pos_special_products_ids'] = self._get_special_products().ids
         self.env['pos.session']._load_pos_data_relations('pos.config', response)
 
+        # Models that should be limited
+        limited_models = ['product.product']
+        
         # Classic data loading
         for model in self._load_self_data_models():
             try:
-                response[model] = self.env[model]._load_pos_self_data(response)
+                model_env = self.env[model]
+                if model in limited_models:
+                    response[model] = model_env._load_pos_self_data(response, limit=1000)
+                else:
+                    response[model] = model_env._load_pos_self_data(response)
                 self.env['pos.session']._load_pos_data_relations(model, response)
             except AccessError as e:
                 response[model] = {
@@ -289,7 +296,6 @@ class PosConfig(models.Model):
                     'fields': self.env[model]._load_pos_self_data_fields(self.id),
                     'error': e.args[0]
                 }
-
                 self.env['pos.session']._load_pos_data_relations(model, response)
 
         return response

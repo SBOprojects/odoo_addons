@@ -47,7 +47,7 @@ class ProductProduct(models.Model):
         params += ['public_description']
         return params
 
-    def _load_pos_self_data(self, data):
+    def _load_pos_self_data(self, data, limit=None):
         domain = self._load_pos_data_domain(data)
         config_id = data['pos.config']['data'][0]['id']
 
@@ -61,7 +61,7 @@ class ProductProduct(models.Model):
         products = self.with_context(display_default_code=False).search_read(
             domain,
             fields,
-            limit=config.get_limited_product_count(),
+            limit=limit or config.get_limited_product_count(),
             order='sequence,default_code,name',
             load=False
         )
