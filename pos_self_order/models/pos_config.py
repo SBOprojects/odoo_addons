@@ -5,9 +5,11 @@ from os.path import join as opj
 from typing import Optional, List, Dict
 from werkzeug.urls import url_quote
 from odoo.exceptions import UserError, ValidationError, AccessError
+from functools import lru_cache
 
 from odoo import api, fields, models, _, service
 from odoo.tools import file_open, split_every
+import json
 
 
 class PosConfig(models.Model):
@@ -150,6 +152,7 @@ class PosConfig(models.Model):
 
         res = super().write(vals)
         self._prepare_self_order_custom_btn()
+        self.clear_self_data_cache()
         return res
 
     @api.depends("module_pos_restaurant")
@@ -265,8 +268,11 @@ class PosConfig(models.Model):
             'res.lang', 'product.attribute', 'product.attribute.custom.value', 'product.template.attribute.line', 'product.template.attribute.value',
             'decimal.precision', 'uom.uom', 'pos.printer', 'pos_self_order.custom_link', 'restaurant.floor', 'restaurant.table', 'account.cash.rounding']
 
-    def load_self_data(self):
-        # Init our first record, in case of self_order is pos_config
+    @api.model
+    @lru_cache(maxsize=32)  # Cache up to 32 different configurations
+    def _get_cached_self_data(self, config_id):
+        """Cache the self-order data at the config level"""
+        self = self.browse(config_id)
         config_fields = self._load_pos_self_data_fields(self.id)
         response = {
             'pos.config': {
@@ -278,10 +284,8 @@ class PosConfig(models.Model):
         response['pos.config']['data'][0]['_pos_special_products_ids'] = self._get_special_products().ids
         self.env['pos.session']._load_pos_data_relations('pos.config', response)
 
-        # Models that should be limited
+        # Load data for other models
         limited_models = ['product.product']
-        
-        # Classic data loading
         for model in self._load_self_data_models():
             try:
                 model_env = self.env[model]
@@ -300,7 +304,13 @@ class PosConfig(models.Model):
 
         return response
 
+    def load_self_data(self):
+        """Use cached data if available"""
+        return self._get_cached_self_data(self.id)
 
+    def clear_self_data_cache(self):
+        """Clear the cache when needed"""
+        self._get_cached_self_data.cache_clear()
 
     def _split_qr_codes_list(self, floors: List[Dict], cols: int) -> List[Dict]:
         """

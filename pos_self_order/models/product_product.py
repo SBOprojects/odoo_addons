@@ -104,11 +104,11 @@ class ProductProduct(models.Model):
             if attributes_by_ptal_id.get(id) is not None
         ]
 
-    def write(self, vals_list):
-        res = super().write(vals_list)
-        if 'self_order_available' in vals_list:
-            for record in self:
-                record._send_availability_status()
+    def write(self, vals):
+        res = super().write(vals)
+        # Clear cache when products are modified
+        if any(f in vals for f in ['self_order_available', 'available_in_pos', 'active']):
+            self.env['pos.config'].clear_self_data_cache()
         return res
 
     def _send_availability_status(self):
