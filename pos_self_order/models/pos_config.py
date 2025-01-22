@@ -286,7 +286,7 @@ class PosConfig(models.Model):
             try:
                 model_env = self.env[model]
                 if model in limited_models:
-                    response[model] = model_env._load_pos_self_data(response, limit=1000)
+                    response[model] = model_env._load_pos_self_data(response, limit=100000)
                 else:
                     response[model] = model_env._load_pos_self_data(response)
                 self.env['pos.session']._load_pos_data_relations(model, response)
