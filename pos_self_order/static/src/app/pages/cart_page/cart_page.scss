@@ -1,5 +1,33 @@
 .order-cart-content {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    
+    .header {
+        flex-shrink: 0;
+    }
+    
+    .order-content {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+    }
+    
+    .footer {
+        flex-shrink: 0;
+        background: white;
+        border-top: 1px solid #dee2e6;
+        z-index: 1000;
+    }
+
     .o_self_order_item_card_image_wrapper {
         width: 3rem;
     }
+}
+
+/* Ensure product cards don't expand unnecessarily */
+.product-card-item {
+    flex-shrink: 0;
 }

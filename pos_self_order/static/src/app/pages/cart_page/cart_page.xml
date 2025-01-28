@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.CartPage">
-        <div class="order-cart-content d-flex flex-column flex-grow-1 justify-content-between overflow-y-auto">
-            <div class="d-flex align-items-center flex-shrink-0 justify-content-between gap-3 p-3 w-100 bg-view border-bottom overflow-x-auto z-1">
+        <div class="order-cart-content d-flex flex-column vh-100">
+            <div class="header flex-shrink-0 d-flex align-items-center justify-content-between gap-3 p-3 w-100 bg-view border-bottom overflow-x-auto z-1">
                 <h1 class="mb-0 fw-bolder text-nowrap">Your Order</h1>
             </div>
-            <div class="order-content flex-grow-1 overflow-auto pb-4">
+            <div class="order-content flex-grow-1 overflow-auto">
                 <t t-foreach="linesToDisplay" t-as="line" t-key="line.uuid">
                     <div t-if="!line.combo_parent_id" class="product-card-item py-2 py-lg-4 px-3 bg-view border-bottom">
                         <t t-set="product" t-value="line.product_id"/>
@@ -75,16 +75,13 @@
                     </div>
                 </t>
             </div>
-        </div>
-        <div class="order-price d-flex-column flex-grow-0">
-            <div class="absolute-content-price d-flex flex-column flex-grow-0 justify-content-center py-2 py-lg-3 px-3 border-bottom border-top bg-view text-end lh-sm">
-                <!-- <p class="o-so-tabular-nums mb-0 fw-bolder">Total: <t t-esc="selfOrder.formatMonetary(selfOrder.currentOrder.get_total_with_tax())" /></p> -->
-                <!-- show total without  -->
-                <p class="o-so-tabular-nums mb-0 fw-bolder">Total: <t t-esc="selfOrder.formatMonetary(selfOrder.currentOrder.get_total_without_tax())" /></p>
-                <!-- <p class="o-so-tabular-nums mb-0 text-muted">Taxes: <t t-esc="selfOrder.formatMonetary(selfOrder.currentOrder.get_total_tax())" /></p> -->
+            <div class="footer">
+                <div class="price-section py-2 py-lg-3 px-3">
+                    <p class="o-so-tabular-nums mb-0 fw-bolder">Total: <t t-esc="selfOrder.formatMonetary(selfOrder.currentOrder.get_total_without_tax())" /></p>
+                </div>
+                <OrderWidget t-if="this.selfOrder.ordering" action.bind="pay" removeTopClasses="true"/>
             </div>
-            <OrderWidget t-if="this.selfOrder.ordering" action.bind="pay" removeTopClasses="true"/>
+            <PopupTable t-if="this.state.selectTable" selectTable.bind="selectTable" />
         </div>
-        <PopupTable t-if="this.state.selectTable" selectTable.bind="selectTable" />
     </t>
 </templates>
