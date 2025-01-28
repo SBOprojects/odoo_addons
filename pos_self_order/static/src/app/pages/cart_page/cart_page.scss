@@ -13,6 +13,7 @@
         flex: 1;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+        padding-bottom: 150px; /* Add padding to prevent content from being hidden behind footer */
     }
     
     .footer {
@@ -20,6 +21,11 @@
         background: white;
         border-top: 1px solid #dee2e6;
         z-index: 1000;
+        position: fixed; /* Fix the footer position */
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
     }
 
     .o_self_order_item_card_image_wrapper {
