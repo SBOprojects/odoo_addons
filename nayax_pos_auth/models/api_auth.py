@@ -493,6 +493,8 @@ class ApiAuth(models.Model):
         _logger.debug(modifier_group_data)
         group_name = modifier_group_data.get('displayName')
         group_id = modifier_group_data.get('id')
+        is_single_selection = modifier_group_data.get('isAllowOnlyOneSelection', False)
+        display_type = 'pills' if is_single_selection else 'multi'
 
         _logger.info(f'Processing Modifier Group: {group_name}')
 
@@ -501,13 +503,16 @@ class ApiAuth(models.Model):
         if not attribute:
             attribute = self.env['product.attribute'].create({
                 'name': group_name,
-                'display_type': 'multi',
+                'display_type': display_type,
                 'create_variant': 'no_variant',
                 'sirius_group_id': group_id
             })
         else:
             # Update the attribute if it already exists
-            attribute.write({'sirius_group_id': group_id})
+            attribute.write({
+                'sirius_group_id': group_id,
+                'display_type': display_type
+            })
         sirius_item_id = modifier_group_data.get('itemId')
     
         product = self.env['product.template'].search([('sirius_item_id', '=', sirius_item_id)], limit=1)
