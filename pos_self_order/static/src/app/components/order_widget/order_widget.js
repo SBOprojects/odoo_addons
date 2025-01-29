@@ -46,16 +46,16 @@ export class OrderWidget extends Component {
         let disabled = false;
 
         if (currentPage === "product_list") {
-            label = _t("Order");
+            label = _t("הזמן");
             disabled = isNoLine || hasNotAllLinesSent.length == 0;
         } else if (
             payAfter === "meal" &&
             Object.keys(this.selfOrder.currentOrder.changes).length > 0
         ) {
-            label = _t("Order");
+            label = _t("הזמן");
             disabled = isNoLine;
         } else {
-            label = kioskPayment ? _t("Pay") : _t("Order");
+            label = kioskPayment ? _t("תשלום") : _t("הזמן");
             disabled = !kioskPayment && !isMobilePayment;
         }
 

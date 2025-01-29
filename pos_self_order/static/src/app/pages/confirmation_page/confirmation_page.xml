@@ -4,7 +4,7 @@
         <div t-if="this.state.onReload" class="self_order_success_loader position-absolute vh-100 w-100 d-flex justify-content-center align-items-center opacity-50 bg-dark">
             <div class="page-loader d-flex justify-content-center align-items-center">
                 <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                    <span class="visually-hidden">טוען...</span>
                 </div>
             </div>
         </div>
@@ -15,17 +15,17 @@
                 <i class="fa fa-check-circle text-success" style="font-size: 5em;"></i>
             </div>
 
-            <h1 class="mb-2">Payment Successful!</h1>
+            <h1 class="mb-2">התשלום בוצע בהצלחה!</h1>
 
 
             <h3 class="mb-3 pickup-message">
-                <i class="fa fa-shopping-bag me-1"></i> Pickup at the Counter
+                <i class="fa fa-shopping-bag me-1"></i> איסוף בדלפק
             </h3>
 
             <!-- Order Number Display -->
             <div class="order-number-container mb-3">
                 <span class="order-number" t-esc="confirmedOrder.tracking_number" />
-                <span class="text-muted d-block">Order Number</span>
+                <span class="text-muted d-block">מספר הזמנה</span>
             </div>
 
             <!-- Table Information (Conditionally displayed) -->
@@ -56,17 +56,17 @@
                 <i class="fa fa-check-circle text-success" style="font-size: 5em;"></i>
             </div>
 
-            <h1 t-if="state.payment and selfOrder.config.self_ordering_pay_after !== 'each'" class="mb-2">Thank you!</h1>
-            <h1 t-else="" class="mb-2">Order Received!</h1>
+            <h1 t-if="state.payment and selfOrder.config.self_ordering_pay_after !== 'each'" class="mb-2">תודה רבה!</h1>
+            <h1 t-else="" class="mb-2">ההזמנה התקבלה!</h1>
 
             <h3 class="mb-3 pickup-message">
-                <i class="fa fa-shopping-bag me-1"></i> Pickup at the Counter
+                <i class="fa fa-shopping-bag me-1"></i> איסוף בדלפק
             </h3>
 
             <!-- Order Number Display -->
             <div class="order-number-container mb-3">
                 <span class="order-number" t-esc="confirmedOrder.tracking_number" />
-                <span class="text-muted d-block">Order Number</span>
+                <span class="text-muted d-block">מספר הזמנה</span>
             </div>
 
             <!-- Table Information (Conditionally displayed) -->
@@ -83,14 +83,14 @@
 
             <!-- Amount Due Display -->
             <h4 t-if="confirmedOrder.state !== 'paid'" class="amount-due mb-2">
-                <span class="text-muted">Amount Due:</span>
+                <span class="text-muted">לתשלום:</span>
                 <span t-esc="selfOrder.formatMonetary(confirmedOrder.amount_total || 0)" />
                 <span class="currency-symbol">₪</span>
             </h4>
 
             <!-- Payment Options Section -->
             <div class="payment-options mt-2 card shadow rounded p-4">
-                <h3 class="mb-2">Payment Method:</h3>
+                <h3 class="mb-2">אמצעי תשלום:</h3>
                 <br></br>
                 <div class="d-flex justify-content-center align-items-center flex-wrap" style="gap: 30px;">
                     <!-- Nayax Payment Button (Modified) -->
@@ -114,7 +114,7 @@
                             <input type="hidden" name="disp_lng" value="he-il" />
                             <input type="hidden" name="disp_mobile" value="auto" />
                             <input type="hidden" name="signature" t-att-value="this.state.hashValue"/>
-                           <input type="submit" value="Pay Now" style="height: 50px ; width: 170px ; font-size: 20px; background-color: #8dc059; color: #fff; border-radius: 4px; border: 0px; background-image: url(https://merchants.coriunder.cloud/Templates/Tmp_Coriunder/images/secure-icon-white.png); background-repeat: no-repeat; background-position: 10px 10px; padding-left: 26px;" />
+                           <input type="submit" value="שלם עכשיו" style="height: 50px ; width: 170px ; font-size: 20px; background-color: #8dc059; color: #fff; border-radius: 4px; border: 0px; background-image: url(https://merchants.coriunder.cloud/Templates/Tmp_Coriunder/images/secure-icon-white.png); background-repeat: no-repeat; background-position: 10px 10px; padding-left: 26px;" />
                             <div style="padding-top: 5px">
                                 <span style="padding-left: 0px; padding-right: 10px; font-size: 12px;">Powered by</span>
                                 <img style="vertical-align:middle" src="https://merchants.ecom.nayax.com/Data/logos/logo.png" height="25px" alt="PSP" />
@@ -124,7 +124,7 @@
 
 
                     <span role="button" t-if="selfOrder.showDownloadButton(confirmedOrder)" t-on-click="() => this.selfOrder.downloadReceipt(this.confirmedOrder)">
-                        Download your receipt here
+                        הורד את הקבלה כאן
                     </span>
                 </div>
             </div>
@@ -133,12 +133,12 @@
             <div class="d-flex justify-content-between mt-4 action-buttons" style="gap: 40px;">
                 <!-- Back to Previous Page Button -->
                 <button class="btn btn-warning btn-lg action-button" t-on-click="goToPreviousPage">
-                        Back
+                        חזור
                 </button>
                 <!-- Close Button -->
                 <button class="btn btn-primary btn-lg action-button" t-on-click="backToHome">
-                    <t t-if="selfOrder.config.self_ordering_mode === 'kiosk'">Close</t>
-                    <t t-else="">Close</t>
+                    <t t-if="selfOrder.config.self_ordering_mode === 'kiosk'">סגור</t>
+                    <t t-else="">סגור</t>
                 </button>
             </div>
         </div>

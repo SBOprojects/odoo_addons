@@ -67,10 +67,10 @@
                                 class="btn btn-lg btn-secondary"
                                 style="border-color: #714B67">
                                 <t t-if="draftOrder.length > 0">
-                                    My Order
+                                    ההזמנה שלי
                                 </t>
                                 <t t-else="">
-                                    My Orders
+                                    ההזמנות שלי
                                 </t>
                             </a>
                         </t>
@@ -92,19 +92,19 @@
                         <div class="mb-4">
                             <i class="fa fa-check-circle text-success" style="font-size: 5em;"></i>
                         </div>
-                        <h2 class="mb-3">Order Confirmed!</h2>
-                        <p class="mb-4 confirmation-message">Thank you for your order. You can place a new order using the button below.</p>
+                        <h2 class="mb-3">ההזמנה אושרה!</h2>
+                        <p class="mb-4 confirmation-message">תודה על הזמנתך. באפשרותך לבצע הזמנה חדשה באמצעות הכפתור למטה.</p>
                         <div t-if="state.order" class="confirmation-details">
                              <div class="order-card">
-                                <h3 class="order-number-title">Order Number</h3>
+                                <h3 class="order-number-title">מספר הזמנה</h3>
                                 <h1 class="order-number"><t t-esc="this.confiOrder[0].order_draft_code"/></h1>
                                 <div class="order-total">
                                 <span></span>
-                                   <span>Order Total:</span><span class="order-total-value"><t t-esc="this.confiOrder[0].amount_total.toFixed(2)"/>₪</span>
+                                   <span>סה"כ להזמנה:</span><span class="order-total-value"><t t-esc="this.confiOrder[0].amount_total.toFixed(2)"/>₪</span>
                                 </div>
                            </div>
                         </div>
-                        <a type="button" t-on-click="start" class="btn btn-lg btn-secondary">New Order</a>
+                        <a type="button" t-on-click="start" class="btn btn-lg btn-secondary">הזמנה חדשה</a>
                     </div>
                 </t>
             </t>

@@ -3,7 +3,7 @@
     <t t-name="pos_self_order.CartPage">
         <div class="order-cart-content d-flex flex-column vh-100">
             <div class="header flex-shrink-0 d-flex align-items-center justify-content-between gap-3 p-3 w-100 bg-view border-bottom overflow-x-auto z-1">
-                <h1 class="mb-0 fw-bolder text-nowrap">Your Order</h1>
+                <h1 class="mb-0 fw-bolder text-nowrap">ההזמנה שלך</h1>
             </div>
             <div class="order-content flex-grow-1 overflow-auto">
                 <t t-foreach="linesToDisplay" t-as="line" t-key="line.uuid">
@@ -77,7 +77,7 @@
             </div>
             <div class="footer">
                 <div class="price-section py-2 py-lg-3 px-3">
-                    <p class="o-so-tabular-nums mb-0 fw-bolder">Total: <t t-esc="selfOrder.formatMonetary(selfOrder.currentOrder.get_total_without_tax())" /></p>
+                    <p class="o-so-tabular-nums mb-0 fw-bolder">סה״כ: <t t-esc="selfOrder.formatMonetary(selfOrder.currentOrder.get_total_without_tax())" /></p>
                 </div>
                 <OrderWidget t-if="this.selfOrder.ordering" action.bind="pay" removeTopClasses="true"/>
             </div>
