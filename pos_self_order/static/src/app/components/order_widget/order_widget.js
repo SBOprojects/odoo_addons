@@ -88,7 +88,7 @@ export class OrderWidget extends Component {
             order.lines.length === 0;
 
         return {
-            name: back ? _t("Back") : _t("Cancel"),
+            name: back ? _t("חזור") : _t("ביטול"),
             icon: back ? "fa fa-arrow-left btn-back" : "btn-close btn-cancel",
         };
     }
