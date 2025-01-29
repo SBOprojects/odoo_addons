@@ -3,7 +3,7 @@
     <template id="pos_self_order.index" name="POS Self Order">&lt;!DOCTYPE html&gt;
         <html>
             <head>
-                <title>Mobile Menu</title>
+                <title>תפריט נייד</title>
                 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
                 <meta http-equiv="content-type" content="text/html, charset=utf-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
@@ -20,9 +20,9 @@
             <body>
                 <div id="initial-loading" class="initial-loading-overlay">
                     <div class="loading-content">
-                        <h1 class="loading-title mb-4">Loading Menu</h1>
+                        <h1 class="loading-title mb-4">טוען תפריט</h1>
                         <div class="loading-spinner mb-4"></div>
-                        <p class="loading-message">Please wait while we prepare your experience...</p>
+                        <p class="loading-message">אנא המתן בזמן שאנו מכינים את החוויה שלך...</p>
                     </div>
                 </div>
                 <div id="self-order-root"></div>

@@ -7,13 +7,13 @@
                     <div class="modal-content rounded">
                         <div class="modal-body p-5">
                             <div class="pb-5 fs-3 text-center">
-                                Are you sure you want to cancel this order? <br/>
-                                <span t-if="selfOrder.config.self_ordering_mode === 'kiosk'" class="text-muted fs-4">All the items will be removed from the cart.</span>
-                                <span t-else="" class="text-muted fs-4">Any items already sent will not be cancelled</span>
+                                האם אתה בטוח שברצונך לבטל הזמנה זו? <br/>
+                                <span t-if="selfOrder.config.self_ordering_mode === 'kiosk'" class="text-muted fs-4">כל הפריטים יוסרו מהעגלה.</span>
+                                <span t-else="" class="text-muted fs-4">פריטים שכבר נשלחו לא יבוטלו</span>
                             </div>
                             <div class="d-flex align-items-center justify-content-center w-100 gap-3">
-                                <button type="button" class="btn btn-primary btn-lg popup_button" t-on-click="() => this.confirm()">Cancel Order</button>
-                                <button type="button" class="btn btn-secondary btn-lg popup_button" t-on-click="() => this.props.close()">Discard</button>
+                                <button type="button" class="btn btn-primary btn-lg popup_button" t-on-click="() => this.confirm()">בטל הזמנה</button>
+                                <button type="button" class="btn btn-secondary btn-lg popup_button" t-on-click="() => this.props.close()">ביטול</button>
                             </div>
                         </div>
                     </div>
