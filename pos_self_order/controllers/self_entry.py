@@ -7,7 +7,18 @@ from odoo.http import request
 
 class PosSelfKiosk(http.Controller):
     @http.route(["/pos-self/<config_id>", "/pos-self/<config_id>/<path:subpath>"], auth="public", website=True, sitemap=True)
-    def start_self_ordering(self, config_id=None, access_token=None, table_identifier=None, subpath=None):
+    def start_self_ordering(self, config_id=None, access_token=None, table_identifier=None, subpath=None, db=None):
+        if db:
+            request.session.db = db
+        elif not request.session.db and request.db_list and len(request.db_list) > 1:
+            # If no database is selected and multiple databases exist, redirect to database selector
+            params = werkzeug.urls.url_encode({
+                'redirect': f'/pos-self/{config_id}',
+                'token': access_token or '',
+                'table': table_identifier or '',
+            })
+            return werkzeug.utils.redirect('/web/database/selector?' + params)
+            
         pos_config, _, config_access_token = self._verify_entry_access(config_id, access_token, table_identifier)
         return request.render(
             'pos_self_order.index',
