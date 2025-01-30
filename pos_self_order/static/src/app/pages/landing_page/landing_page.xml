@@ -75,13 +75,14 @@
                             </a>
                         </t>
                     </div>
+                    <!-- shahd -->
                     <div t-if="selfOrder.models['pos_self_order.custom_link'].length" class="d-flex gap-3 flex-grow-1">
                         <t t-foreach="selfOrder.models['pos_self_order.custom_link'].getAll()" t-as="link" t-key="link.id">
                             <a type="button"
                                 t-if="!hideBtn(link)"
                                 t-on-click="(event) => this.clickCustomLink(link)"
                                 t-attf-class="btn btn-lg btn-{{link.style}}">
-                                <t t-esc="link.name"/>
+                                הזמן עכשיו
                             </a>
                         </t>
                     </div>
@@ -104,7 +105,7 @@
                                 </div>
                            </div>
                         </div>
-                        <a type="button" t-on-click="start" class="btn btn-lg btn-secondary">הזמנה חדשה</a>
+                        <a type="button" t-on-click="start" class="btn btn-lg btn-secondary" dir="rtl" style="font-family: system-ui, -apple-system, sans-serif;">הזמנה חדשה</a>
                     </div>
                 </t>
             </t>

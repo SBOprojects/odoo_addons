@@ -19,7 +19,10 @@
                     </div>
                 </div>
             </div>
-            <button t-attf-class="cart btn btn-primary btn-lg flex-grow-1 flex-md-grow-0 {{ buttonToShow.disabled ? 'disabled' : '' }}" t-on-click="props.action" t-esc="buttonToShow.label"/>
-        </div>
+            <!-- shahd -->
+    <button t-attf-class="cart btn btn-primary btn-lg flex-grow-1 flex-md-grow-0 {{ buttonToShow.disabled ? 'disabled' : '' }}" t-on-click="props.action">
+
+        <t t-esc="buttonToShow.label === 'Order' ? 'הזמנה ' : 'לשלם '" />
+    </button>        </div>
     </t>
 </templates>

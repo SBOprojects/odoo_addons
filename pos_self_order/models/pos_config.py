@@ -129,7 +129,7 @@ class PosConfig(models.Model):
 
             if not exists:
                 record.env['pos_self_order.custom_link'].create({
-                    'name': _('Order Now'),
+                    'name': _('הזמן עכשיו'),
                     'url': f'/pos-self/{record.id}/products',
                     'pos_config_ids': [(4, record.id)],
                 })

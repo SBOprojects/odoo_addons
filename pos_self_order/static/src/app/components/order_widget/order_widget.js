@@ -12,6 +12,7 @@ export class OrderWidget extends Component {
         this.selfOrder = useSelfOrder();
         this.router = useService("router");
         this.dialog = useService("dialog");
+        console.log(this.buttonToShow)
     }
 
     cancel() {
@@ -58,7 +59,7 @@ export class OrderWidget extends Component {
             label = kioskPayment ? _t("תשלום") : _t("הזמן");
             disabled = !kioskPayment && !isMobilePayment;
         }
-
+        console.log("buttonToShow", label, disabled);
         return { label, disabled };
     }
 
