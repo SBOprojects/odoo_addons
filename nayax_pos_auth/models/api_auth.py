@@ -305,28 +305,31 @@ class ApiAuth(models.Model):
            raise UserError(f"Failed to send data to the API: {e}")
 
     def import_transactions(self):
+        # Get the current company
+        company_id = self.env.company.id
+        
         api_url = "https://gateway-api-srv.stage.bnayax.com/api/transaction-draft-order"
-
         config = self.env['ir.config_parameter'].sudo()
-        # self.env['api.auth'].search([], order="id desc", limit=1)
         token = get_token(config)
-
+        
         headers = {
             "Authorization": f"Bearer {token.strip()}",
         }
-
+        
         try:
             response = requests.get(api_url, headers=headers, timeout=30)
             response.raise_for_status()
             response_data = response.json()
-            # print(f"API Response: {response_data}") # Log the full response for debugging
-            return {"result": "API call successful", "data": response_data}  # Return something other than false
-
+            
+            # Process the data with company filtering
+            for item in response_data.get('data', []):
+                # Add company_id to the item data
+                item['company_id'] = company_id
+                
+            return {"result": "API call successful", "data": response_data}
+            
         except requests.exceptions.RequestException as e:
             _logger.error(f"API Request Error: {e}")
-            return {"error": str(e)}
-        except Exception as e:
-            _logger.error(f"Unexpected Error: {e}")
             return {"error": str(e)}
 
     def display_notification(self, title, message, notification_type='info'):
@@ -399,7 +402,7 @@ class ApiAuth(models.Model):
            _logger.error(f"Unexpected error while storing image: {e}")
 
     @api.model
-    def _create_or_update_categories_action(self, hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5):
+    def _create_or_update_categories_action(self, hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5, company_id):
         """Creates or updates product and POS categories based on the Nayax hierarchy."""
 
         parent_product_category_id = False
@@ -423,6 +426,7 @@ class ApiAuth(models.Model):
                             'name': category_name,
                             'nayax_category_code': category_code,
                             'parent_id': parent_product_category_id or False,
+                            'company_id': company_id,  # Set company_id on product category
                         })
                         parent_product_category_id = new_product_category.id
 
@@ -440,7 +444,7 @@ class ApiAuth(models.Model):
                             'name': category_name,
                             'nayax_category_code': category_code,
                             'parent_id': parent_pos_category_id or False,
-
+                            'company_id': company_id, #Set company_id on POS Category
                         })
                         parent_pos_category_id = new_pos_category.id
                         _logger.info(
@@ -486,7 +490,7 @@ class ApiAuth(models.Model):
             _logger.info(f"modifier attribute value: {modifier_name} already exists.")
 
     @api.model
-    def _create_or_update_modifier_group_action(self, modifier_group_data):
+    def _create_or_update_modifier_group_action(self, modifier_group_data, company_id):
         """
         Creates or updates product attributes and values for modifiers groups.
         """
@@ -573,6 +577,9 @@ class ApiAuth(models.Model):
         """
         Fetches items and modifiers from the API and creates/updates records in Odoo.
         """
+        # Get the current company
+        company_id = self.env.company.id
+
         base_url = "https://gateway-api-srv.stage.bnayax.com/api/export/item"
         config = self.env['ir.config_parameter'].sudo()
         token = get_token(config)
@@ -586,7 +593,7 @@ class ApiAuth(models.Model):
 
         if not last_update_date_str:
             # First time fetching items
-            self._fetch_and_process_items(f"{base_url}", headers, is_modifier=False)
+            self._fetch_and_process_items(f"{base_url}", headers, is_modifier=False, company_id=company_id)
             # Set the last update time
             now = datetime.datetime.now(timezone.utc)
             config.set_param('bnayax_api.items_last_update', now.strftime("%Y-%m-%dT%H:%M:%S%z"))
@@ -601,7 +608,7 @@ class ApiAuth(models.Model):
                 update_date = datetime.datetime.combine(current_date, datetime.time.min).replace(tzinfo=timezone.utc)
                 update_date_str = update_date.strftime("%Y-%m-%d") + 'T00%3A00%3A00%2B03%3A00'    
                 _logger.info(f"Fetching items updated on: {update_date_str}")
-                self._fetch_and_process_items(f"{base_url}?updateDate={update_date_str}", headers, is_modifier=False)
+                self._fetch_and_process_items(f"{base_url}?updateDate={update_date_str}", headers, is_modifier=False, company_id=company_id)
                 current_date += datetime.timedelta(days=1)
             
             # Set the last update time
@@ -610,7 +617,7 @@ class ApiAuth(models.Model):
         
         return self.display_notification('Success', 'Complete Export All Items!', 'success')
 #mariel - updated here to check if there is image to call the _store_image_in_attachment method
-    def _fetch_and_process_items(self, api_url, headers, is_modifier):
+    def _fetch_and_process_items(self, api_url, headers, is_modifier, company_id):
         try:
             # API Request
             response = requests.post(api_url, headers=headers, timeout=30)
@@ -633,7 +640,7 @@ class ApiAuth(models.Model):
                     # Check hierarchy condition and create categories
                     if hierarchy1.get('id') != 6:
                         pos_category_id, product_category_id = self._create_or_update_categories_action(
-                            hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5
+                            hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5, company_id
                         )
 
                     # Process modifiers
@@ -680,6 +687,7 @@ class ApiAuth(models.Model):
                             'prices': prices,
                             'list_price': list_price,
                             'taxes_id': [(6, 0, [])],  # No taxes applied
+                            'company_id': company_id,  # Assign the current company
                         }
                         new_product = self.env['product.template'].create(product_values)
                         _logger.info(f"Created product {product_name} with ID {sirius_item_id}")
@@ -700,6 +708,7 @@ class ApiAuth(models.Model):
                             'prices': prices,
                             'list_price': list_price,
                             'taxes_id': [(6, 0, [])],  # No taxes applied
+                            'company_id': company_id,  # Assign the current company
                         }
                         existing_product.write(product_values)
                         _logger.info(f"Updated product {product_name} with ID {sirius_item_id}")
@@ -715,7 +724,7 @@ class ApiAuth(models.Model):
             return {"error": str(e)}
 
     @api.model
-    def _fetch_and_process_modifiers_full(self, headers):
+    def _fetch_and_process_modifiers_full(self, headers, company_id):
         api_url = "https://gateway-api-srv.stage.bnayax.com/api/item/modifier/full"
 
         try:
@@ -730,7 +739,7 @@ class ApiAuth(models.Model):
                     # Iterate through the groups array within each response item
                     for modifier_group in response_item.get('groups', []):
                          _logger.debug(modifier_group)
-                         self._create_or_update_modifier_group_action(modifier_group)
+                         self._create_or_update_modifier_group_action(modifier_group, company_id)
 
 
         except requests.exceptions.RequestException as e:
@@ -744,6 +753,8 @@ class ApiAuth(models.Model):
         """
         Fetches modifiers from the API and creates/updates records in Odoo.
         """
+        # Get the current company
+        company_id = self.env.company.id
         config = self.env['ir.config_parameter'].sudo()
         token = get_token(config)
 
@@ -751,7 +762,7 @@ class ApiAuth(models.Model):
             "Authorization": f"Bearer {token.strip()}",
         }
         # Fetch modifiers
-        self._fetch_and_process_modifiers_full(headers)
+        self._fetch_and_process_modifiers_full(headers, company_id)
 
         return self.display_notification('Success', 'Complete Export All Modifiers!', 'success')
     

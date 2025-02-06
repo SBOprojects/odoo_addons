@@ -29,6 +29,15 @@ class PosSelfKiosk(http.Controller):
     @http.route("/pos-self/data/<config_id>", type='json', auth='public')
     def get_self_ordering_data(self, config_id=None, access_token=None, table_identifier=None):
         pos_config, _, _ = self._verify_entry_access(config_id, access_token, table_identifier)
+        # Get the current user's company
+        company_id = self.env.company.id
+        
+        # Add company filter to the search domain
+        products = self.env['product.template'].search([
+            ('company_id', '=', company_id),
+            ('sent_to_api', '=', False)
+        ])
+        
         return pos_config.load_self_data()
 
     def _verify_entry_access(self, config_id=None, access_token=None, table_identifier=None):
