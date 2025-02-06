@@ -32,8 +32,11 @@ class PosSelfKiosk(http.Controller):
         # Get the current user's company
         company_id = request.env.company.id
         
-        # Add company filter to the search domain
-        products = request.env['product.template'].search([
+        # Use the POS config's default user
+        user = pos_config.self_ordering_default_user_id
+        
+        # Add company filter to the search domain and use the default user
+        products = request.env['product.template'].sudo().with_user(user).search([
             ('company_id', '=', company_id),
             ('sent_to_api', '=', False)
         ])
