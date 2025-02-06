@@ -617,7 +617,7 @@ class ApiAuth(models.Model):
         
         return self.display_notification('Success', 'Complete Export All Items!', 'success')
 #mariel - updated here to check if there is image to call the _store_image_in_attachment method
-    def _fetch_and_process_items(self, api_url, headers, is_modifier, company_id):
+    def _fetch_and_process_items(self, api_url, headers, is_modifier, company_id, skip_ids=None):
         try:
             # API Request
             response = requests.post(api_url, headers=headers, timeout=30)
@@ -626,14 +626,7 @@ class ApiAuth(models.Model):
             _logger.debug(f"API Response for {api_url}: {response_data}")
 
             if response_data and response_data.get('data') and response_data.get('data').get('responseList'):
-                # Get the list of Sirius IDs we want to keep
-                wanted_sirius_ids = set(self.env['product.template'].search([('sirius_item_id', '!=', False)]).mapped('sirius_item_id'))
-
-                # Filter the API response *before* processing
-                filtered_items = [item for item in response_data['data']['responseList']
-                                if item.get('id') in wanted_sirius_ids]
-
-                for item in filtered_items:
+                for item in response_data['data']['responseList']:
                     # Extract product details
                     product_name = item.get('shortDisplayName', 'Unnamed Product')
                     sirius_item_id = item.get('id')
@@ -644,11 +637,13 @@ class ApiAuth(models.Model):
                     hierarchy4 = item.get('hierarchy4')
                     hierarchy5 = item.get('hierarchy5')
 
-                    # Check hierarchy condition and create categories
-                    if hierarchy1.get('id') != 6:
-                        pos_category_id, product_category_id = self._create_or_update_categories_action(
-                            hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5, company_id
-                        )
+                    # Skip category creation if hierarchy1.id is in skip_ids
+                    # {6,2,1} : e.g on multiple ids skipped
+                    if skip_ids is None:
+                        skip_ids = {6,1,4}
+                    if hierarchy1 and hierarchy1.get('id') in skip_ids:
+                        _logger.debug(f"Skipping category creation for item {product_name} due to hierarchy1.id in skip_ids")
+                        continue  # Skip to the next item in the loop
 
                     # Process modifiers
                     if is_modifier:
@@ -677,6 +672,11 @@ class ApiAuth(models.Model):
                         [('sirius_item_id', '=', sirius_item_id)], limit=1
                     )
                     isModifier = item.get('isModifier')
+
+                    # Check hierarchy condition and create categories
+                    pos_category_id, product_category_id = self._create_or_update_categories_action(
+                        hierarchy1, hierarchy2, hierarchy3, hierarchy4, hierarchy5, company_id
+                    )
 
                     if not existing_product:
                         # Create a new product
@@ -723,6 +723,7 @@ class ApiAuth(models.Model):
                         # Attach the image if available
                         if image_url:
                             self._store_image_in_attachment_action(image_url, existing_product.id)
+
         except requests.exceptions.RequestException as e:
             _logger.error(f"API Request Error: {e}")
             return {"error": str(e)}
