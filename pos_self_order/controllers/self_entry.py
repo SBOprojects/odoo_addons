@@ -30,10 +30,10 @@ class PosSelfKiosk(http.Controller):
     def get_self_ordering_data(self, config_id=None, access_token=None, table_identifier=None):
         pos_config, _, _ = self._verify_entry_access(config_id, access_token, table_identifier)
         # Get the current user's company
-        company_id = self.env.company.id
+        company_id = request.env.company.id
         
         # Add company filter to the search domain
-        products = self.env['product.template'].search([
+        products = request.env['product.template'].search([
             ('company_id', '=', company_id),
             ('sent_to_api', '=', False)
         ])
