@@ -4,7 +4,6 @@ import json
 import threading
 import time
 import requests
-import schedule
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import _
