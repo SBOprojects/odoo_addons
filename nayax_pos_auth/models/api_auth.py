@@ -626,7 +626,14 @@ class ApiAuth(models.Model):
             _logger.debug(f"API Response for {api_url}: {response_data}")
 
             if response_data and response_data.get('data') and response_data.get('data').get('responseList'):
-                for item in response_data['data']['responseList']:
+                # Get the list of Sirius IDs we want to keep
+                wanted_sirius_ids = set(self.env['product.template'].search([('sirius_item_id', '!=', False)]).mapped('sirius_item_id'))
+
+                # Filter the API response *before* processing
+                filtered_items = [item for item in response_data['data']['responseList']
+                                if item.get('id') in wanted_sirius_ids]
+
+                for item in filtered_items:
                     # Extract product details
                     product_name = item.get('shortDisplayName', 'Unnamed Product')
                     sirius_item_id = item.get('id')
@@ -651,7 +658,7 @@ class ApiAuth(models.Model):
                     else:
                         prices = item.get('prices', [])
                         list_price = 0.0 # Set a default list_price if all price are null or no prices
- 
+
                         if prices:
                             # Get the maximum price, default to 0 if prices are empty or invalid
                             max_price_item = max(prices, key=lambda p: p.get('price', 0.0))
