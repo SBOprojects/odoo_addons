@@ -1,0 +1,16 @@
+[2/3/2025 3:27:48 PM] - Application failed to start: Failed to bind to address http://[::]:8080: address already in use.
+
+[2/3/2025 3:27:59 PM] - Application failed to start: Failed to bind to address http://[::]:8080: address already in use.
+
+[2/3/2025 3:28:01 PM] - Application failed to start: Failed to bind to address http://[::]:8080: address already in use.
+
+[2/3/2025 3:28:12 PM] - Application failed to start: Failed to bind to address http://[::]:8080: address already in use.
+
+[2/3/2025 3:28:23 PM] - Response received: {"jsonrpc":"2.0","id":"123454352","result":{"statusCode":998,"statusMessage":"TRANSACTION CANCELED","appVersion":"01.06.56","retailerId":"0883012013","ecrNo":"1","vuid":"5891334d-6454-4225-a95c-c9debbd76376","tranCode":1,"currency":"376","amount":200,"creditTerms":1,"uid":"25020315281008830120930","authCodeManpik":0,"acquirerMerchantID":"0","isPreAuthAllowed":true}}
+Status Code: OK
+Response Content: {"jsonrpc":"2.0","id":"123454352","result":{"statusCode":998,"statusMessage":"TRANSACTION CANCELED","appVersion":"01.06.56","retailerId":"0883012013","ecrNo":"1","vuid":"5891334d-6454-4225-a95c-c9debbd76376","tranCode":1,"currency":"376","amount":200,"creditTerms":1,"uid":"25020315281008830120930","authCodeManpik":0,"acquirerMerchantID":"0","isPreAuthAllowed":true}}
+
+[2/3/2025 3:28:34 PM] - Response received: {"jsonrpc":"2.0","id":"123454352","result":{"statusCode":998,"statusMessage":"TRANSACTION CANCELED","appVersion":"01.06.56","retailerId":"0883012013","ecrNo":"1","vuid":"{{$guid}}","tranCode":2,"currency":"376","amount":257,"creditTerms":1,"uid":"25020315282308830120935","authCodeManpik":0,"acquirerMerchantID":"0","isPreAuthAllowed":true}}
+Status Code: OK
+Response Content: {"jsonrpc":"2.0","id":"123454352","result":{"statusCode":998,"statusMessage":"TRANSACTION CANCELED","appVersion":"01.06.56","retailerId":"0883012013","ecrNo":"1","vuid":"{{$guid}}","tranCode":2,"currency":"376","amount":257,"creditTerms":1,"uid":"25020315282308830120935","authCodeManpik":0,"acquirerMerchantID":"0","isPreAuthAllowed":true}}
+
