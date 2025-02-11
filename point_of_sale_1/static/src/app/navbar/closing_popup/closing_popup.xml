@@ -1,0 +1,12 @@
+<templates id="pos_close_register_extension.template" xml:space="preserve">
+    <t t-inherit="point_of_sale.ClosePosPopup" t-inherit-mode="extension">
+        <xpath expr="//div[@class='w-100 d-flex flex-wrap justify-content-between gap-2']" position="inside">
+             <div class="d-flex gap-2">
+                     <button class="button btn btn-secondary" t-on-click="downloadReportX">Report X</button>
+                    <button class="button btn btn-secondary" t-on-click="downloadReportZ">Report Z</button>
+                <t>
+                </t>
+              </div>
+        </xpath>
+    </t>
+</templates>

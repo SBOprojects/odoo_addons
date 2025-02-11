@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+   <t t-inherit="point_of_sale.PaymentScreen" t-inherit-mode="extension">
+<xpath expr="//PaymentScreenPaymentLines" position="replace">
+                    <PaymentScreenPaymentLines
+                        paymentLines="paymentLines"
+                        deleteLine.bind="deletePaymentLine"
+                        sendForceDone.bind="sendForceDone"
+                        sendPaymentReverse.bind="sendPaymentReverse"
+                        sendPaymentCancel.bind="sendPaymentCancel"
+                        sendPaymentRequest.bind="sendPaymentRequest"
+                        selectLine.bind="selectPaymentLine"
+                        updateSelectedPaymentline.bind="updateSelectedPaymentline" 
+                        validateOrder = "validateOrder"
+                        />
+</xpath>
+    </t>
+
+    <t t-inherit="point_of_sale.PaymentScreenValidate" t-inherit-mode="extension">
+     <xpath expr="//t[@t-name='point_of_sale.PaymentScreenValidate']/t[@t-else='']/button[@class='button next validation btn btn-primary btn-lg w-50 py-3 lh-lg']" position="attributes">
+            <attribute name="t-att-disabled">!allPaymentsAreCash</attribute>
+            <attribute name="t-attf-textContent">test</attribute>
+        </xpath>
+    </t>
+
+</templates>
