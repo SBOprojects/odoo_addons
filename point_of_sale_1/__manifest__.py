@@ -6,9 +6,12 @@
     'version': '1.0.1',
     'category': 'Sales/Point of Sale',
     'sequence': 40,
-    'summary': 'User-friendly PoS interface for shops and restaurants',
-'depends': ['base', 'point_of_sale'],
+    "author": "KAD",
+    'summary': 'report x and z & online payment by nayax',
+    'depends': ['base', 'point_of_sale'],
     'data': [
+        'views/res_config_settings_view.xml',
+        'views/pos_payment_method_views.xml',
     ],
 
     'installable': True,

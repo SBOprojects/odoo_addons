@@ -72,9 +72,9 @@ patch(PaymentScreen.prototype, {
 
         if (paymentMethod.use_payment_terminal === "nayax") {
             const result = this.currentOrder.add_paymentline(paymentMethod);
-            if (!this.currentOrder.check_paymentlines_rounding()) {
-                this._display_popup_error_paymentlines_rounding();
-            }
+            // if (!this.currentOrder.check_paymentlines_rounding()) {
+            //     this._display_popup_error_paymentlines_rounding();
+            // }
 
             if (result) {
                 this.numberBuffer.reset();
@@ -102,9 +102,9 @@ patch(PaymentScreen.prototype, {
 
         // original function: click_paymentmethods
         const result = this.currentOrder.add_paymentline(paymentMethod);
-        if (!this.currentOrder.check_paymentlines_rounding()) {
-            this._display_popup_error_paymentlines_rounding();
-        }
+        // if (!this.currentOrder.check_paymentlines_rounding()) {
+        //     this._display_popup_error_paymentlines_rounding();
+        // }
 
         if (result) {
             this.numberBuffer.reset();
@@ -167,27 +167,6 @@ patch(PaymentScreen.prototype, {
     },
 
 
-
-
-    async validateOrder(isForceValidate) {
-        console.log(isForceValidate)
-        this.numberBuffer.capture();
-        if (this.pos.config.cash_rounding) {
-            if (!this.currentOrder.check_paymentlines_rounding()) {
-                this._display_popup_error_paymentlines_rounding();
-                return;
-            }
-        }
-        if (await this._isOrderValid(isForceValidate)) {
-            // remove pending payments before finalizing the validation
-            for (const line of this.paymentLines) {
-                if (!line.is_done()) {
-                    this.currentOrder.remove_paymentline(line);
-                }
-            }
-            await this._finalizeValidation();
-        }
-    },
 
 
 });
