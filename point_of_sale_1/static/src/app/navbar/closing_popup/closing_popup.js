@@ -2,6 +2,7 @@ import { ConnectionLostError } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 import { ClosePosPopup } from '@point_of_sale/app/navbar/closing_popup/closing_popup';
 import { patch } from "@web/core/utils/patch";
+import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
 
 patch(ClosePosPopup.prototype, {
 
@@ -20,15 +21,48 @@ patch(ClosePosPopup.prototype, {
         const minutes = String(date.getMinutes()).padStart(2, '0');
         return `${day}-${month}-${year} ${hours}:${minutes}`;
     },
+    async confirm() {
+        console.log("confirm")
+        if (!this.pos.config.cash_control || this.env.utils.floatIsZero(this.getMaxDifference())) {
+            await this.closeSession();
+            this.downloadReportZ();
+            return;
+        }
+        if (this.hasUserAuthority()) {
+            const response = await ask(this.dialog, {
+                title: _t("Payments Difference"),
+                body: _t(
+                    "The money counted doesn't match what we expected. Want to log the difference for the books?"
+                ),
+                confirmLabel: _t("Proceed Anyway"),
+                cancelLabel: _t("Discard"),
+            });
+            if (response) {
+                this.downloadReportZ();
+                await  this.closeSession();
+                return;
 
+            }
+            return ;
+        }
+        this.dialog.add(ConfirmationDialog, {
+            title: _t("Payments Difference"),
+            body: _t(
+                "The maximum difference allowed is %s.\nPlease contact your manager to accept the closing difference.",
+                this.env.utils.formatCurrency(this.props.amount_authorized_diff)
+            ),
+        });
+        
+
+    },
     generateReportXContent() {
         let content = "";
         // Header with Company Name and VAT ID
         content += `<div style="display: flex; justify-content: flex-start; margin-bottom: 10px; width: 100%;">
         <div style="font-size: 0.9em; line-height: 0.5; width: 100%;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0;">
-                <div style="text-align: right;">Company name:</div>
-            <div style="text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">${this.props.orders_details.company_name}</div>
+            <div style="div style="display: flex; align-items: flex-start; margin-bottom: 0;"">
+                <div style="text-align: left; flex: 1;">Company name:</div>
+            <div style="text-align: right; flex: 1; word-wrap: break-word;">${this.props.orders_details.company_name}</div>
             </div>
             <div style="display: flex; justify-content: space-between; margin-top: 0;">
                 <div style="text-align: right;">Company ID VAT:</div>
@@ -175,10 +209,10 @@ patch(ClosePosPopup.prototype, {
         // Header with Company Name and VAT ID
         content += `<div style="display: flex; justify-content: flex-start; margin-bottom: 10px; width: 100%;">
             <div style="font-size: 0.9em; line-height: 0.5; width: 100%;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0;">
-                    <div style="text-align: right;">Company name:</div>
-                    <div style="text-align: left;">${this.props.orders_details.company_name}</div>
-                </div>
+                 <div style="div style="display: flex; align-items: flex-start; margin-bottom: 0;"">
+                <div style="text-align: left; flex: 1;">Company name:</div>
+            <div style="text-align: right; flex: 1; word-wrap: break-word;">${this.props.orders_details.company_name}</div>
+            </div>
                 <div style="display: flex; justify-content: space-between; margin-top: 0;">
                     <div style="text-align: right;">Company ID VAT:</div>
                     <div style="text-align: left;">${this.props.orders_details.company_vat}</div>

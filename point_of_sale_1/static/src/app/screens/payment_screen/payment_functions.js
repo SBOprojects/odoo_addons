@@ -7,7 +7,7 @@ export async function sendTransactionRequest(amount, vuid, api_key, tranType, pu
         "id": "0883012",
         "params": [
             "ashrait", {
-                "vuid": vuid,
+                "vuid": `${vuid}`,
                 "tranType": tranType,
                 "tranCode": 1,
                 "creditTerms": 1,
@@ -21,6 +21,7 @@ export async function sendTransactionRequest(amount, vuid, api_key, tranType, pu
         ]
     }
 
+    console.log("Payload:", payload);
     // Send the request
     const url = `https://${public_api_key}:8443/SPICy/`;
 

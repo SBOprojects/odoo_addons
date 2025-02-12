@@ -36,21 +36,21 @@ patch(PaymentScreenPaymentLines.prototype, {
                 { type: "success" }
             );
         }
+        
 
         const tarminal_name = paymentline.payment_method_id?.use_payment_terminal;
-
         if (tarminal_name === 'nayax') {
 
 
             const api_key = paymentline.payment_method_id?.api_key;
             const public_api_key = paymentline.payment_method_id?.public_api_key;
             console.log('****************************')
-            console.log(paymentline)
             const amount = paymentline.get_amount();
             const adjustedAmount = Math.round(amount * 100);
             const absoluteAmount = Math.abs(adjustedAmount);
 
-            const vuid = "{{$guid}}"; // Replace with actual dynamic value if needed
+
+            const vuid = paymentline.pos_order_id.uuid; // Replace with actual dynamic value if needed
             const tranType = adjustedAmount >= 0 ? 1 : 53;
 
             let result;
@@ -146,7 +146,7 @@ patch(PaymentScreenPaymentLines.prototype, {
         console.log("Due amount:", roundedDueAmount);
 
         // Check if the rounded amounts match
-        if (roundedTotalAmount === roundedDueAmount) {
+        if (roundedTotalAmount >= roundedDueAmount) {
             // If the amounts match, activate the validateOrder method
             console.log("Amount matches, validating order.");
             this.pos.validateOrder()
