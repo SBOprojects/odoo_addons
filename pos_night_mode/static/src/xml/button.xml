@@ -1,0 +1,7 @@
+<template id="template" xml:space="preserve">
+    <t name="NavbarInherit" t-inherit="point_of_sale.Navbar"
+       t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('status-buttons')]//CashierName" position="before">
+        </xpath>
+    </t>
+</template>

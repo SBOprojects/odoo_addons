@@ -1,0 +1,592 @@
+// Define color variables
+$o-community-color: #FFCA00;
+$o-black-color: #000000 !important;
+$o-white-color: #ffffff !important;
+$o-light-gray-color: #f2f2f2 !important;
+$o-dark-gray-color: #6c757d !important;
+
+.text-bg-info {
+    background-color: $o-black-color !important;
+}
+
+/* Button styles */
+
+// Override .btn-primary font color to black
+
+.form-check-input:checked {
+    background-color: $o-community-color;
+    border-color: $o-community-color;
+}
+
+.bg-warning {
+    background-color: #FFCA00 !important;
+}
+
+.text-primary {
+    --color: $o-community-color;
+    color: $o-community-color !important;
+}
+
+.badge.text-primary {
+    color: $o-community-color;
+    --btn-bg: $o-white-color;
+    --btn-hover-border-color: $o-community-color;
+    --btn-hover-color: $o-community-color;
+    --btn-hover-bg: $o-white-color;
+}
+
+.badge.text-bg-default,
+.badge.bg-light,
+.badge.text-bg-light,
+.badge.bg-default,
+.badge.text-primary {
+    outline: 1px solid $o-community-color;
+    outline-offset: -1px;
+}
+
+.text-primary {
+    color: $o-community-color;
+}
+
+a {
+    color: $o-community-color;
+
+}
+
+.bg-primary {
+    background-color: $o-community-color;
+}
+
+// Override .o_button font color to black
+.o_button {
+    background-color: $o-community-color;
+    color: $o-black-color;
+    border: none;
+}
+
+// Change the top bar to black
+.o_header,
+.navbar {
+    background-color: $o-black-color;
+    color: $o-white-color;
+}
+
+// Whole Odoo background color
+.o_home_menu_background,
+.o_web_client.o_home_menu_background {
+    background-size: cover;
+    background-attachment: fixed;
+    background-color: $o-light-gray-color;
+    background-image: none;
+}
+
+.alert {
+    background-color: $o-community-color;
+}
+
+.alert-info {
+    --alert-border-color: $o-community-color;
+}
+
+.o_main_navbar .o_menu_systray .badge {
+    background-color: $o-community-color;
+    color: #000000;
+}
+
+// POS
+:root {
+    --primary-color: $o-community-color;
+    --bg-white: $o-white-color;
+    --text-color: $o-black-color;
+    --text-color-light: $o-dark-gray-color;
+    --background-color: $o-light-gray-color;
+    --card-background: $o-black-color;
+    --emphasis-color: #07474b;
+    --dark-background: $o-white-color;
+}
+
+body {
+    font-family: "Montserrat", sans-serif;
+    background-color: var(--background-color);
+}
+
+:root {
+    --pos-background: $o-black-color;
+    --pos-product-background: $o-light-gray-color;
+    --pos-text-color: $o-black-color;
+    --pos-price-color: $o-community-color;
+    --pos-selected-orderline: #777777;
+    --pos-info-color: #B3B7BF;
+    --pos-numpad-button-hover: $o-community-color;
+    --pos-popup-background: $o-white-color;
+    --pos-popup-button: $o-community-color;
+    --pos-highlight-color: rgb(163, 163, 163);
+    --pos-modal-button: $o-community-color;
+    --pos-light-gray-background: $o-black-color;
+    --pos-light-gray-notes: #c1c3c6;
+    --pos-paymentline-selected: #707375;
+    --pos-next-button: $o-black-color;
+    --pos-payment-button-background: $o-white-color;
+    --pos-numpad-text-color: $o-black-color;
+}
+
+// Use the variables throughout the rest of the file
+.pos {
+    color: var(--pos-text-color);
+    background-color: var(--pos-background);
+}
+
+.pos .product {
+    background-color: var(--pos-product-background) !important;
+    border: thin solid var(--pos-text-color);
+    border-radius: 5px;
+}
+
+.pos .product-list {
+    background-color: var(--pos-product-background) !important;
+}
+
+.pos .product .price-tag {
+    color: var(--pos-price-color) !important;
+}
+
+.pos .product-content .product-name {
+    color: var(--pos-text-color);
+}
+
+.pos .order {
+    background-color: var(--pos-product-background);
+}
+
+.pos .rightpane {
+    background-color: var(--pos-product-background);
+}
+
+.pos .rightpane-header {
+    background-color: var(--pos-product-background);
+}
+
+.pos .pos-content .product-screen .leftpane .pads .control-buttons .fw-bolder {
+    color: var(--pos-text-color);
+}
+
+.pos .breadcrumb-button {
+    color: var(--pos-text-color);
+}
+
+.pos .form-control {
+    color: var(--pos-text-color);
+}
+
+.pos .category-simple-button {
+    background-color: var(--pos-product-background) !important;
+}
+
+.pos .sb-product .pos-search-bar {
+    background-color: var(--pos-product-background) !important;
+}
+
+.pos .pos-search-bar input,
+.pos .partner-list .pos-search-bar input {
+    color: var(--pos-text-color);
+}
+
+.pos .orderline .selected {
+    background-color: var(--pos-selected-orderline) !important;
+}
+
+.pos .info-list {
+    color: var(--pos-info-color) !important;
+}
+
+.pos .info-list em {
+    color: var(--pos-info-color) !important;
+}
+
+// .pos .control-button {
+//     background-color: var(--pos-product-background) !important;
+// }
+
+// .pos .numpad button {
+//     background-color: var(--pos-product-background);
+//     color: var(--pos-numpad-text-color);
+// }
+
+// .pos .numpad button:hover {
+//     background-color: var(--pos-numpad-button-hover) !important;
+// }
+
+.pos .button.validation:hover {
+    background-color: var(--pos-numpad-button-hover) !important;
+}
+
+.pos .button.next.validation {
+    background-color: var(--pos-product-background);
+    color: var(--pos-text-color);
+}
+
+.pos .o_payment_successful h1 {
+    color: var(--pos-text-color);
+}
+
+.pos .top-content-center h1 {
+    color: var(--pos-text-color);
+}
+
+// .pos .pay-order-button {
+//     background-color: var(--pos-product-background) !important;
+// }
+
+// .pos .cc .button {
+//     background-color: var(--pos-product-background);
+//     color: var(--pos-text-color);
+// }
+
+// .pos .actionpad .button:hover {
+//     background-color: var(--pos-numpad-button-hover) !important;
+// }
+
+// .pos .control-button:hover {
+//     background-color: var(--pos-numpad-button-hover) !important;
+// }
+
+.pos .modal-dialog .popup {
+    background-color: var(--pos-popup-background) !important;
+}
+
+// .pos .popup .button {
+//     background: var(--pos-popup-button);
+//     color: var(--pos-text-color) !important;
+// }
+
+// .ticket-screen .controls button {
+//     background-color: var(--pos-text-color);
+//     color: var(--pos-text-color);
+// }
+
+.ticket-screen .pos-search-bar .filter {
+    color: var(--pos-text-color);
+}
+
+.ticket-screen .pos-search-bar .filter .options {
+    border-radius: 5px;
+}
+
+.pos .order-container {
+    background-color: var(--pos-product-background) !important;
+}
+
+.pos .order-summary {
+    background-color: var(--pos-product-background) !important;
+}
+
+.pos .order-summary .subentry {
+    color: var(--pos-text-color) !important;
+}
+
+.pos .pos-content .product-screen .leftpane .pads .control-button .fa-undo {
+    color: var(--pos-text-color) !important;
+}
+
+.pos .partner-list {
+    color: var(--pos-text-color);
+}
+
+.pos .partner-list .table-hover thead>tr {
+    background-color: var(--pos-product-background);
+    color: var(--pos-text-color);
+}
+
+.pos .partner-list tr.partner-line:hover {
+    background-color: var(--pos-numpad-button-hover);
+}
+
+.pos .partner-list tr.partner-line.highlight {
+    background-color: var(--pos-highlight-color);
+}
+
+.screen .screen-content {
+    background-color: var(--pos-light-gray-background);
+}
+
+.pos .partner-list .ms-auto i {
+    color: var(--pos-text-color);
+}
+
+.pos .partner-list .ms-auto input {
+    color: var(--pos-text-color);
+}
+
+.screen .top-content .button.highlight {
+    background-color: var(--pos-highlight-color) !important;
+    border-color: var(--pos-product-background) !important;
+}
+
+.screen .top-content {
+    background-color: var(--pos-product-background);
+}
+
+.pos .close-pos-popup header {
+    background-color: var(--pos-dark-background);
+}
+
+.pos .popup .title {
+    background-color: var(--pos-dark-background);
+}
+
+.pos .close-pos-popup .closing-notes {
+    background-color: var(--pos-light-gray-notes);
+}
+
+.pos .opening-cash-control .opening-cash-notes {
+    background-color: var(--pos-light-gray-notes);
+}
+
+// .paymentmethods .button {
+//     background: var(--pos-payment-button-background);
+// }
+
+.payment-screen .main-content {
+    background: var(--pos-product-background);
+}
+
+.pos .paymentline {
+    background: var(--pos-product-background);
+}
+
+.pos .paymentline.selected {
+    background: var(--pos-paymentline-selected);
+}
+
+// .pos .screen .button.next:not(.highlight) {
+//     background: var(--pos-next-button);
+//     color: var(--pos-highlight-color);
+// }
+
+.receipt-screen .default-view {
+    background: var(--pos-product-background);
+}
+
+// .pos .pay-order-button {
+//     background-color: var(--pos-next-button) !important;
+// }
+
+.receipt-screen .default-view .actions .send-email input {
+    background: var(--pos-dark-background);
+    color: var(--pos-text-color);
+}
+
+// .receipt-screen .default-view .actions .buttons .button {
+//     background: var(--pos-dark-background);
+// }
+
+.receipt-screen .default-view .actions .send-email button.send {
+    background: var(--pos-highlight-color);
+    color: var(--pos-text-color);
+}
+
+.pos .pos-receipt-container>div {
+    color: var(--pos-text-color);
+}
+
+// .pos .popup.popup-error .button {
+//     background: var(--pos-modal-button);
+// }
+
+.pos .orders .order-row:nth-child(n) {
+    background: var(--pos-product-background);
+}
+
+.pos .orders .order-row.highlight {
+    background: var(--pos-highlight-color);
+}
+
+.pos .orders .order-row:hover {
+    background: var(--pos-numpad-button-hover);
+}
+
+.pos .pos-content .product-screen .leftpane .bg-100 {
+    background-color: var(--pos-light-gray-notes) !important;
+}
+
+// .payment-screen .payment-buttons .button {
+//     background: var(--pos-product-background);
+//     color: var(--pos-text-color);
+// }
+
+// .payment-screen .payment-buttons .button:hover {
+//     background: var(--pos-numpad-button-hover);
+// }
+
+.paymentmethod {
+    color: var(--pos-text-color);
+}
+
+.o_notification_body {
+    color: var(--pos-text-color);
+}
+
+.modal-title {
+    color: var(--pos-text-color);
+}
+
+.modal-header {
+    color: var(--pos-text-color);
+}
+
+// .modal-content {
+//     background: var(--pos-product-background);
+//     color: var(--pos-text-color);
+// }
+
+.modal-body {
+    color: var(--pos-text-color);
+}
+
+.modal-body .button:hover {
+    background: var(--pos-numpad-button-hover);
+}
+
+// .modal-header .btn {
+//     background: var(--pos-modal-button);
+//     color: var(--pos-text-color);
+// }
+
+// .modal-footer .btn {
+//     background: var(--pos-modal-button);
+//     color: var(--pos-text-color);
+// }
+
+// .search-more-button .btn {
+//     background: var(--pos-next-button);
+//     color: var(--pos-text-color);
+// }
+
+.pos-receipt .order-container .orderline {
+    background-color: var(--pos-product-background);
+}
+
+.payment-infos {
+    background-color: var(--pos-product-background);
+}
+
+.btn-primary {
+    --btn-color: #000000;
+    --btn-bg: #FFCA00;
+    --btn-hover-color: #ffffff;
+    --btn-hover-bg: #000000;
+    border: none;
+
+    --btn-active-color: #FFF;
+    --btn-active-bg: #000000;
+    --btn-active-border-color: #ffffff;
+    --btn-focus-shadow-rgba: 0 0 0 0.5;
+    --btn-disabled-color: #ffffff;
+    --btn-disabled-bg: #000000;
+    --btn-disabled-border-color: #FFF;
+}
+
+
+.btn-light {
+    --btn-hover-bg: #FFCA00;
+    --btn-hover-border-color: #F9FAFB;
+}
+
+.btn-check:checked+.btn,
+:not(.btn-check)+.btn:active,
+.btn:first-child:active,
+.btn.active,
+.btn.show {
+    color: var(--btn-active-color);
+    background-color: #f2f2f2;
+    border-color: #FFCA00;
+    box-shadow: var(--btn-active-shadow);
+}
+
+.btn-check:checked+.btn,
+:not(.btn-check)+.btn:active,
+.btn:first-child:active,
+.btn.active,
+.btn.show {
+    color: var(--btn-active-color);
+    background-color: #f2f2f2;
+    border-color: #FFCA00;
+    box-shadow: var(--btn-active-shadow);
+}
+
+.o-mail-MessagingMenu-headerFilter.o-active {
+    background-color: #f2f2f2;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.btn-link {
+    --btn-color: #000000;
+    --btn-hover-color: #FFCA00;
+}
+
+.o-mail-NotificationItem.o-important {
+    background-color: #f2f2f2 !important;
+    border-color: #d6d5d5 !important;
+}
+
+.orderline.selected {
+    background-color: #f2f2f2;
+    border: 1px solid #FFCA00;
+}
+
+.bg-700,
+.text-bg-700 {
+    --background-color: rgb(0, 0, 0);
+    background-color: rgb(0, 0, 0) !important;
+}
+
+.order-row:hover {
+    color: rgb(0, 0, 0);
+    background-color: #f2f2f2 !important;
+}
+
+.bg-primary {
+    color: rgb(0, 0, 0);
+
+    --background-color: #FFCA00;
+    background-color: #FFCA00;
+}
+
+.text-white-muted,
+.text-white-disabled,
+.text-white-75,
+.text-white-50,
+.text-white-25,
+.text-white {
+    --color: rgb(0, 0, 0);
+    color: var(--color) !important;
+}
+
+.border-primary {
+    --border-opacity: 1;
+    border-color: #FFCA00 !important;
+}
+
+.btn-outline-primary {
+    color: $o-black-color !important;
+    --btn-bg: $o-black-color !important;
+    --btn-hover-border-color: $o-community-color !important;
+    --btn-hover-color: $o-community-color !important;
+    --btn-hover-bg: $o-white-color !important;
+}
+
+.btn-secondary {
+    color: $o-black-color !important;
+    --btn-bg: $o-white-color !important;
+    --btn-hover-border-color: $o-community-color !important;
+    --btn-hover-color: #FFCA00;
+    --btn-hover-bg: $o-black-color !important;
+
+    --btn-active-color: $o-black-color ;
+    --btn-active-bg: $o-white-color;
+    --btn-active-border-color: $o-community-color ;
+    --btn-focus-shadow-rgba: 0 0 0 0.5;
+    --btn-disabled-color: $o-black-color ;
+    --btn-disabled-bg: $o-white-color;
+    --btn-disabled-border-color: $o-community-color ;
+}
