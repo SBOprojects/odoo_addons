@@ -8,9 +8,16 @@ $o-dark-gray-color: #6c757d !important;
 .text-bg-info {
     background-color: $o-black-color !important;
 }
-
+.o_main_navbar .o_menu_sections .o_nav_entry, .o_main_navbar .o_menu_sections .dropdown-toggle {
+    background: #6c757d;
+    border: 1px solid transparent;
+}
 /* Button styles */
+.o_main_navbar {
 
+    border-bottom: 1px solid #6c757d;
+    background: #6c757d;
+}
 // Override .btn-primary font color to black
 
 .form-check-input:checked {
