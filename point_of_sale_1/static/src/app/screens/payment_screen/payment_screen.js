@@ -27,7 +27,7 @@ patch(PaymentScreen.prototype, {
         this.payment_interface = null;
         this.error = false;
         this.pos.validateOrder = this.validateOrder.bind(this);
-
+        this.pos.currentOrder = this.currentOrder
 
     },
 

@@ -135,8 +135,9 @@ patch(PaymentScreenPaymentLines.prototype, {
             return sum + line.get_amount();
         }, 0);
         console.log('****************************')
+        console.log(this.pos.currentOrder.getTotalDue())
         console.log(selectedPaymentLines)
-        const dueAmount = selectedPaymentLines[0].pos_order_id.amount_total;
+        const dueAmount = this.pos.currentOrder.getTotalDue();
 
         const roundedTotalAmount = Math.round(totalAmount * 100) / 100;
         const roundedDueAmount = Math.round(dueAmount * 100) / 100;
@@ -150,7 +151,7 @@ patch(PaymentScreenPaymentLines.prototype, {
             // If the amounts match, activate the validateOrder method
             console.log("Amount matches, validating order.");
             this.pos.validateOrder()
-        
+    
         } else {
             // If the amounts don't match, do nothing
             console.log("Amount does not match due amount.");
