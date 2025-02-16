@@ -7,6 +7,8 @@ import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { Component, useState } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
+import { SelectionPopup } from "@point_of_sale/app/utils/input_popups/selection_popup";
+import { makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
 
 // kad_shahd
 import { sendTransactionRequest } from '@point_of_sale_1/app/screens/payment_screen/payment_functions';
@@ -29,6 +31,7 @@ patch(PaymentScreenPaymentLines.prototype, {
         this.props.selectLine(paymentline.uuid);
 
         if (paymentline.payment_method_id?.type === 'cash') {
+            console.log(paymentline.get_amount())
             this.selectedPaymentLines.push(paymentline);
             await this.checkPaymentLinesAmountSum(this.selectedPaymentLines);
             this.notification.add(
@@ -41,7 +44,26 @@ patch(PaymentScreenPaymentLines.prototype, {
         const tarminal_name = paymentline.payment_method_id?.use_payment_terminal;
         if (tarminal_name === 'nayax') {
 
-
+            try {
+                const selectedPaymentType = await makeAwaitable(this.dialog, SelectionPopup, {
+                     list : [
+                        { id: 1, label: "Regular Payment", item: { id: 1, name: "Regular" } },
+                        { id: 2, label: "Special Credit Payment", item: { id: 2, name: "Special Credit" } },
+                        { id: 3, label: "Immediate Payment", item: { id: 3, name: "Immediate" } },
+                        { id: 6, label: "Credit Payment", item: { id: 6, name: "Credit" } },
+                        { id: 8, label: "Settlements Payment", item: { id: 8, name: "Settlements" } },
+                    ],
+                    title: _t("Please select the payment type"),
+                });
+    
+                if (selectedPaymentType) {
+                    console.log("Selected payment type:", selectedPaymentType);
+                } else {
+                    console.log("No payment type selected.");
+                }
+            } catch (error) {
+                console.error("Error selecting payment type:", error);
+            }
             const api_key = paymentline.payment_method_id?.api_key;
             const public_api_key = paymentline.payment_method_id?.public_api_key;
             console.log('****************************')
@@ -135,8 +157,6 @@ patch(PaymentScreenPaymentLines.prototype, {
             return sum + line.get_amount();
         }, 0);
         console.log('****************************')
-        console.log(this.pos.currentOrder.getTotalDue())
-        console.log(selectedPaymentLines)
         const dueAmount = this.pos.currentOrder.getTotalDue();
 
         const roundedTotalAmount = Math.round(totalAmount * 100) / 100;
@@ -147,7 +167,7 @@ patch(PaymentScreenPaymentLines.prototype, {
         console.log("Due amount:", roundedDueAmount);
 
         // Check if the rounded amounts match
-        if (roundedTotalAmount >= roundedDueAmount) {
+        if (roundedTotalAmount == roundedDueAmount) {
             // If the amounts match, activate the validateOrder method
             console.log("Amount matches, validating order.");
             this.pos.validateOrder()

@@ -165,7 +165,20 @@ patch(PaymentScreen.prototype, {
             this.selectedPaymentLine.set_amount(amount);
         }
     },
+    async validateOrder(isForceValidate) {
+        this.numberBuffer.capture();
+        if (await this._isOrderValid(isForceValidate)) {
+            // remove pending payments before finalizing the validation
+            for (const line of this.paymentLines) {
+                if (!line.is_done()) {
+                    this.currentOrder.remove_paymentline(line);
+                }
+            }
+            await this._finalizeValidation();
+            this.pos.printReceipt()
 
+        }
+    },
 
 
 

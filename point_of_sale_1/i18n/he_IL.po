@@ -1,0 +1,323 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* point_of_sale_1
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0+e-20241105\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-02-16 11:48+0000\n"
+"PO-Revision-Date: 2025-02-16 11:48+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: point_of_sale_1
+#. odoo-python
+#: code:addons/point_of_sale_1/models/Pos_Payment_Method.py:0
+msgid "API key cannot be empty!"
+msgstr "מפתח API לא יכול להיות ריק!"
+
+#. module: point_of_sale_1
+#: model_terms:ir.ui.view,arch_db:point_of_sale_1.pos_config_settings_view_form
+msgid "Accept payments with a Nayax payment terminal"
+msgstr "קבל תשלומים באמצעות מסוף תשלום של Nayax"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Cancel"
+msgstr "ביטול"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Cancel Payment Request"
+msgstr "בטל בקשת תשלום"
+
+#. module: point_of_sale_1
+#: model:ir.model,name:point_of_sale_1.model_res_config_settings
+msgid "Config Settings"
+msgstr "הגדרות תצורה"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Connection error"
+msgstr "שגיאת חיבור"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.js:0
+msgid ""
+"Could not connect to the payment terminal. Please check your network "
+"connection or IP configuration."
+msgstr "לא ניתן להתחבר למסוף התשלום. אנא בדוק את חיבור הרשת או את תצורת ה-IP שלך."
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Delete"
+msgstr "מחק"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/navbar/closing_popup/closing_popup.js:0
+msgid "Discard"
+msgstr "בטל"
+
+#. module: point_of_sale_1
+#: model:ir.model.fields,help:point_of_sale_1.field_res_config_settings__module_pos_nayax
+msgid "Enable this feature to activate the custom PoS functionality."
+msgstr "אפשר תכונה זו כדי להפעיל את פונקציונליות ה-PoS המותאמת אישית."
+
+#. module: point_of_sale_1
+#: model_terms:ir.ui.view,arch_db:point_of_sale_1.pos_payment_method_view_form_inherit_nayax
+msgid ""
+"Enter device  IP in the format '000.000.000.000' for Nayax integration."
+msgstr "הזן את כתובת ה-IP של המכשיר בפורמט '000.000.000.000' עבור שילוב Nayax."
+
+#. module: point_of_sale_1
+#: model_terms:ir.ui.view,arch_db:point_of_sale_1.pos_payment_method_view_form_inherit_nayax
+msgid ""
+"Enter netowk public IP in the format '000.000.000.000' for Nayax "
+"integration."
+msgstr "הזן IP ציבורי של רשת בפורמט '000.000.000.000' עבור שילוב Nayax."
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_screen.js:0
+msgid "Error"
+msgstr "שגיאה"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Force Done"
+msgstr "סיום בכוח"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Force done"
+msgstr "סיים בכוח"
+
+#. module: point_of_sale_1
+#: model:ir.model.fields,field_description:point_of_sale_1.field_res_config_settings__module_pos_nayax
+#: model_terms:ir.ui.view,arch_db:point_of_sale_1.pos_config_settings_view_form
+msgid "Nayax"
+msgstr "Nayax"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.js:0
+msgid "New amount"
+msgstr "סכום חדש"
+
+#. module: point_of_sale_1
+#: model:ir.model.fields,field_description:point_of_sale_1.field_pos_payment_method__api_key
+msgid "Payment Device IP "
+msgstr "כתובת IP של מכשיר התשלום"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Payment Successful"
+msgstr "תשלום בוצע בהצלחה"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.js:0
+msgid "Payment completed successfully."
+msgstr "התשלום הושלם בהצלחה."
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Payment request pending"
+msgstr "בקשת תשלום ממתינה"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Payment reversed"
+msgstr "התשלום בוטל"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/navbar/closing_popup/closing_popup.js:0
+msgid "Payments Difference"
+msgstr "הפרש תשלומים"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.js:0
+msgid "Please select the payment type"
+msgstr "אנא בחר את סוג התשלום"
+
+#. module: point_of_sale_1
+#: model:ir.model,name:point_of_sale_1.model_pos_payment_method
+msgid "Point of Sale Payment Methods"
+msgstr "אמצעי תשלום בקופה"
+
+#. module: point_of_sale_1
+#: model:ir.model,name:point_of_sale_1.model_pos_session
+msgid "Point of Sale Session"
+msgstr "סשן קופה"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/navbar/closing_popup/closing_popup.js:0
+msgid "Proceed Anyway"
+msgstr "המשך בכל זאת"
+
+#. module: point_of_sale_1
+#: model:ir.model.fields,field_description:point_of_sale_1.field_pos_payment_method__public_api_key
+msgid "Public IP"
+msgstr "IP ציבורי"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/navbar/closing_popup/closing_popup.xml:0
+msgid "Report X"
+msgstr "דוח X"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/navbar/closing_popup/closing_popup.xml:0
+msgid "Report Z"
+msgstr "דוח Z"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Request sent"
+msgstr "הבקשה נשלחה"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Retry"
+msgstr "נסה שוב"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Reversal request sent to terminal"
+msgstr "בקשת ביטול נשלחה למסוף"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Reverse"
+msgstr "הפוך"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Reverse Payment"
+msgstr "הפוך תשלום"
+
+#. module: point_of_sale_1
+#: model_terms:ir.ui.view,arch_db:point_of_sale_1.pos_payment_method_view_form_inherit_nayax
+msgid "Save API Key"
+msgstr "שמור מפתח API"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Send"
+msgstr "שלח"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Send Payment Request"
+msgstr "שלח בקשת תשלום"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/navbar/closing_popup/closing_popup.js:0
+msgid ""
+"The maximum difference allowed is %s.\n"
+"Please contact your manager to accept the closing difference."
+msgstr ""
+"ההפרש המקסימלי המותר הוא %s.\n"
+"אנא צור קשר עם המנהל שלך כדי לאשר את הפרש הסגירה."
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/navbar/closing_popup/closing_popup.js:0
+msgid ""
+"The money counted doesn't match what we expected. Want to log the difference"
+" for the books?"
+msgstr "הכסף שנספר לא תואם למה שציפינו. האם תרצה לרשום את ההפרש בספרים?"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.js:0
+msgid "The transaction was cancelled by the payment terminal."
+msgstr "העסקה בוטלה על ידי מסוף התשלום."
+
+#. module: point_of_sale_1
+#: model_terms:ir.ui.view,arch_db:point_of_sale_1.pos_config_settings_view_form
+msgid ""
+"The transactions are processed by Nayax. Set your Nayax credentials on the "
+"related payment method."
+msgstr "העסקאות מעובדות על ידי Nayax. הגדר את אישורי ה-Nayax שלך באמצעי התשלום המתאים."
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_screen.js:0
+msgid "There is already an electronic payment in progress."
+msgstr "כבר מתבצע תשלום אלקטרוני."
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_screen.js:0
+msgid ""
+"To ensure due balance follow-up, generate an invoice or download the "
+"accounting application. "
+msgstr ""
+"כדי להבטיח מעקב אחר יתרה לתשלום, הפק חשבונית או הורד את יישום הנהלת החשבונות."
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Transaction cancelled"
+msgstr "העסקה בוטלה"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
+msgid "Waiting for card"
+msgstr "ממתין לכרטיס"
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_screen.js:0
+msgid "Warning"
+msgstr "אזהרה"
+
+#. module: point_of_sale_1
+#. odoo-python
+#: code:addons/point_of_sale_1/models/pos_session.py:0
+msgid ""
+"You don't have the access rights to get the point of sale closing control "
+"data."
+msgstr "אין לך את זכויות הגישה לקבלת נתוני בקרת סגירת הקופה."
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.js:0
+msgid "cash Payment line selected."
+msgstr "שורת תשלום במזומן נבחרה."
+
+#. module: point_of_sale_1
+#. odoo-javascript
+#: code:addons/point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.js:0
+msgid "online Payment failed for this resone: "
+msgstr "התשלום המקוון נכשל בגלל סיבה זו:"
