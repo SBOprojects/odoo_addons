@@ -1,0 +1,15 @@
+<odoo>
+<!-- kad_shahd -->
+    <record id="pos_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.pos.nayax</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='pos_payment_terminals_section']" position="inside">
+                                         <setting id="pos_nayax_setting" title="The transactions are processed by Nayax. Set your Nayax credentials on the related payment method." string="Nayax" help="Accept payments with a Nayax payment terminal">
+                                <field name="module_pos_nayax"/>
+                            </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>
