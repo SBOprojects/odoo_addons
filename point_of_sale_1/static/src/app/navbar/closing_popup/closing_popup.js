@@ -60,9 +60,9 @@ patch(ClosePosPopup.prototype, {
         // Header with Company Name and VAT ID
         content += `<div style="display: flex; justify-content: flex-start; margin-bottom: 10px; width: 100%; direction: rtl; text-align: right;">
             <div style="font-size: 0.9em; line-height: 0.5; width: 100%;">
-                <div style="display: flex; align-items: flex-start; margin-bottom: 0;">
-                    <div style="flex: 1;">שם חברה:</div>
-                    <div style="flex: 1; word-wrap: break-word;">${this.props.orders_details.company_name}</div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 0;">
+                      <div>שם חברה:</div>
+                    <div style>${this.props.orders_details.company_name}</div>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-top: 0;">
                     <div>מע"מ מזהה חברה:</div>
@@ -205,9 +205,9 @@ patch(ClosePosPopup.prototype, {
         // Header with Company Name and VAT ID
         content += `<div style="display: flex; justify-content: flex-start; margin-bottom: 10px; width: 100%; direction: rtl; text-align: right;">
             <div style="font-size: 0.9em; line-height: 0.5; width: 100%;">
-                <div style="display: flex; align-items: flex-start; margin-bottom: 0;">
-                    <div style="flex: 1;">שם חברה:</div>
-                    <div style="flex: 1; word-wrap: break-word;">${this.props.orders_details.company_name}</div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 0;">
+                      <div>שם חברה:</div>
+                    <div style>${this.props.orders_details.company_name}</div>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-top: 0;">
                     <div>מע"מ מזהה חברה:</div>
