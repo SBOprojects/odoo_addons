@@ -20,9 +20,11 @@
                 "point_of_sale_1/static/src/app/navbar/closing_popup/closing_popup.xml",
                 "point_of_sale_1/static/src/app/navbar/closing_popup/closing_popup.js",
                 "point_of_sale_1/static/src/app/screens/payment_screen/payment_screen.js",
-                "point_of_sale_1/static/src/app/screens/payment_screen/payment_screen.xml",
+                # "point_of_sale_1/static/src/app/screens/payment_screen/payment_screen.xml",
                 "point_of_sale_1/static/src/app/screens/payment_screen/payment_lines/payment_lines.js",
                 "point_of_sale_1/static/src/app/screens/payment_screen/payment_functions.js",
+                "point_of_sale_1/static/src/app/store/pos_store.js",
+
 
 
     ],

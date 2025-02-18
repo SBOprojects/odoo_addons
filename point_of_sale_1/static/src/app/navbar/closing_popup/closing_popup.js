@@ -3,6 +3,7 @@ import { _t } from "@web/core/l10n/translation";
 import { ClosePosPopup } from '@point_of_sale/app/navbar/closing_popup/closing_popup';
 import { patch } from "@web/core/utils/patch";
 import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
+import {sendDoPeriodic} from '@point_of_sale_1/app/screens/payment_screen/payment_functions';
 
 patch(ClosePosPopup.prototype, {
 
@@ -65,7 +66,7 @@ patch(ClosePosPopup.prototype, {
                     <div style>${this.props.orders_details.company_name}</div>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-top: 0;">
-                    <div>מע"מ מזהה חברה:</div>
+                    <div>עוסק מורשה :</div>
                     <div>${this.props.orders_details.company_vat}</div>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-top: 0;">
@@ -176,14 +177,16 @@ patch(ClosePosPopup.prototype, {
     },
     
     printReportX(reportContent) {
-        const printWindow = window.open('', '', 'height=600,width=800');
+        const printWindow = window.open('', '' ,'height=600,width=800');
         if (printWindow) {
-            printWindow.document.write('<html><head><title>X דו"ח </title>');
+            printWindow.document.write('<html><head><title>X דו"ח </title><link href="https://fonts.googleapis.com/css?family=Heebo" rel="stylesheet">');
             printWindow.document.write('<style>');
+            printWindow.document.write('@page { margin: 0; }'); // Removes default browser margins, including headers/footers
             printWindow.document.write('body { font-family: Heebo; font-size: 12px; }');
             printWindow.document.write('pre { white-space: pre-wrap; word-wrap: break-word; }'); // Ensure line wrapping
             printWindow.document.write('</style>');
             printWindow.document.write('</head><body>');
+            printWindow.document.write('<div  style="text-align: right;">X דו"ח  </div>');
             printWindow.document.write(`<pre>${reportContent}</pre>`);
             printWindow.document.write('</body></html>');
             printWindow.document.close();
@@ -194,10 +197,14 @@ patch(ClosePosPopup.prototype, {
             console.error('Failed to open print window. Please allow pop-ups.');
         }
     },
-    downloadReportZ() {
+    async downloadReportZ() {
         const reportContent = this.generateReportZContent();
         this.printReportZ(reportContent);
+        let result;
+        result = await sendDoPeriodic()
+        console.log("result", result)    
     },
+
     totalAmount: 0,
 
     generateReportZContent() {
@@ -210,7 +217,7 @@ patch(ClosePosPopup.prototype, {
                     <div style>${this.props.orders_details.company_name}</div>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-top: 0;">
-                    <div>מע"מ מזהה חברה:</div>
+                    <div>עוסק מורשה :</div>
                     <div>${this.props.orders_details.company_vat}</div>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-top: 0;">
@@ -441,14 +448,17 @@ patch(ClosePosPopup.prototype, {
         return orders;
     },
     printReportZ(reportContent) {
+        
         const printWindow = window.open('', '', 'height=600,width=800');
         if (printWindow) {
-            printWindow.document.write('<html><head><title>Z דו"ח </title>');
-            printWindow.document.write('<style>');
-            printWindow.document.write('body { font-family: Heebo; font-size: 12px; }'); // Added font-size: 10px
-            printWindow.document.write('pre { white-space: pre-wrap; word-wrap: break-word; }'); // Ensure line wrapping
-            printWindow.document.write('</style>');
-            printWindow.document.write('</head><body>');
+           printWindow.document.write('<html><head><title>Z  דו"ח </title><link href="https://fonts.googleapis.com/css?family=Heebo" rel="stylesheet">');
+           printWindow.document.write('<style>');
+           printWindow.document.write('@page { margin: 0; }'); // Removes default browser margins, including headers/footers
+           printWindow.document.write('body { font-family: Heebo; font-size: 12px; }');
+           printWindow.document.write('pre { white-space: pre-wrap; word-wrap: break-word; }'); // Ensure line wrapping
+           printWindow.document.write('</style>');
+           printWindow.document.write('</head><body>');
+           printWindow.document.write('<div  style="text-align: right;">Z דו"ח  </div>');
             printWindow.document.write(`<pre>${reportContent}</pre>`);
             printWindow.document.write('</body></html>');
             printWindow.document.close();
