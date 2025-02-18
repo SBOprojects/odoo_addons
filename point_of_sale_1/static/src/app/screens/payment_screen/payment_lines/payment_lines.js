@@ -9,6 +9,7 @@ import { Component, useState } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { SelectionPopup } from "@point_of_sale/app/utils/input_popups/selection_popup";
 import { makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
+// import { OnlinePaymentPopup } from "@point_of_sale_1/app/screens/payment_screen/OnlinePaymentPopup";  // Import the new popup
 
 // kad_shahd
 import { sendTransactionRequest, sendTransactionPhase1, sendTransactionPhase2 } from '@point_of_sale_1/app/screens/payment_screen/payment_functions';
@@ -43,6 +44,9 @@ patch(PaymentScreenPaymentLines.prototype, {
 
             const api_key = paymentline.payment_method_id?.api_key;
             const public_api_key = paymentline.payment_method_id?.public_api_key;
+            this.pos.public_api_key =public_api_key;
+            this.pos.api_key =api_key;
+
             console.log('****************************')
             const amount = paymentline.get_amount();
             const adjustedAmount = Math.round(amount * 100);
@@ -217,6 +221,7 @@ patch(PaymentScreenPaymentLines.prototype, {
                     }
                 }
             }
+
         }
 
         if (this.ui.isSmall) {

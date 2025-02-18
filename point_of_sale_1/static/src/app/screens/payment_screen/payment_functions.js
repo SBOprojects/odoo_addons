@@ -23,7 +23,6 @@ export async function sendTransactionRequest(amount, vuid, api_key, tranType, pu
 
     console.log("Payload:", payload);
     // Send the request
-    // const url = 'http://192.168.1.13:8080/SPICy';
     const url = `https://${public_api_key}:8443/SPICy/`;
 
     try {
@@ -75,7 +74,7 @@ export async function sendTransactionPhase1(amount, vuid, api_key, tranType, pub
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                // "id": api_key,
+                "id": api_key,
             },
             body: JSON.stringify(payload),
         });
@@ -115,7 +114,7 @@ export async function sendTransactionPhase2(vuid, api_key, public_api_key , paym
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                // "id": api_key,
+                "id": api_key,
             },
             body: JSON.stringify(payload),
         });
@@ -130,7 +129,7 @@ export async function sendTransactionPhase2(vuid, api_key, public_api_key , paym
 
 
 // kad_shahd
-export async function sendDoPeriodic() {
+export async function sendDoPeriodic(public_api_key,api_key) {
     const payload ={
         "jsonrpc": "2.0",
         "method": "doPeriodic",
@@ -146,14 +145,13 @@ export async function sendDoPeriodic() {
     console.log("Payload:", payload);
     // Send the request
     const url = `https://${public_api_key}:8443/SPICy/`;
-    //const url = `https://${public_api_key}:8443/SPICy/`;
 
     try {
         const response = await fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                // "id": api_key,
+                "id": api_key,
             },
             body: JSON.stringify(payload),
         });

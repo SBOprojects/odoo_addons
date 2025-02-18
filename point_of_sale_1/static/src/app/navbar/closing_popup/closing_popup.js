@@ -4,9 +4,23 @@ import { ClosePosPopup } from '@point_of_sale/app/navbar/closing_popup/closing_p
 import { patch } from "@web/core/utils/patch";
 import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
 import {sendDoPeriodic} from '@point_of_sale_1/app/screens/payment_screen/payment_functions';
+import { usePos } from "@point_of_sale/app/store/pos_hook";
+import { useService } from "@web/core/utils/hooks";
+import {  useState } from "@odoo/owl";
+import { useAsyncLockedMethod } from "@point_of_sale/app/utils/hooks";
 
 patch(ClosePosPopup.prototype, {
 
+    setup() {
+        this.pos = usePos();
+        this.report = useService("report");
+        this.hardwareProxy = useService("hardware_proxy");
+        this.dialog = useService("dialog");
+        this.ui = useState(useService("ui"));
+        this.state = useState(this.getInitialState());
+        this.confirm = useAsyncLockedMethod(this.confirm);
+        this.orm = useService("orm");
+    },
     // all the code under here is done by shahd and rami
     // New Function: downloadReportX
     downloadReportX() {
@@ -201,7 +215,11 @@ patch(ClosePosPopup.prototype, {
         const reportContent = this.generateReportZContent();
         this.printReportZ(reportContent);
         let result;
-        result = await sendDoPeriodic()
+        const paymentTemplates = await this.orm.searchRead("pos.payment.method" ,[
+            ["use_payment_terminal", "=", "nayax"]
+        ]);
+
+        result = await sendDoPeriodic(paymentTemplates[0].public_api_key, paymentTemplates[0].api_key);
         console.log("result", result)    
     },
 
